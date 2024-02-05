@@ -32,7 +32,7 @@
         <module>dubbo-qos</module>
         <module>dubbo-auth</module>
         <module>dubbo-reactive</module>
-        <module>dubbo-security</module>
+<!--        <module>dubbo-security</module>-->
         <module>dubbo-spring-security</module>
         <module>dubbo-qos-api</module>
     </modules>

@@ -28,7 +28,7 @@ import org.apache.dubbo.rpc.service.GenericService;
 
 public class Application {
 
-    private static final String REGISTRY_URL = "zookeeper://127.0.0.1:2181";
+    private static final String REGISTRY_URL = "zookeeper://192.168.91.13:2181";
 
 
 
@@ -56,7 +56,10 @@ public class Application {
         GenericService genericService = (GenericService) demoService;
         Object genericInvokeResult = genericService.$invoke("sayHello", new String[]{String.class.getName()},
             new Object[]{"dubbo generic invoke"});
+        System.out.println("--------------------------------------");
         System.out.println(genericInvokeResult.toString());
+        System.out.println("--------------------------------------");
+
     }
 
 }
