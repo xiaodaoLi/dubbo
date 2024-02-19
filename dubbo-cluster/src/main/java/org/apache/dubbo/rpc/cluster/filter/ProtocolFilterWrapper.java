@@ -19,6 +19,8 @@ package org.apache.dubbo.rpc.cluster.filter;
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.extension.Activate;
+import org.apache.dubbo.common.logger.ErrorTypeAwareLogger;
+import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.common.utils.UrlUtils;
 import org.apache.dubbo.rpc.Exporter;
 import org.apache.dubbo.rpc.Invoker;
@@ -39,6 +41,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.SERVICE_FILTER_K
 public class ProtocolFilterWrapper implements Protocol {
 
     private final Protocol protocol;
+    private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(ProtocolFilterWrapper.class);
+
 
     public ProtocolFilterWrapper(Protocol protocol) {
         if (protocol == null) {
@@ -54,6 +58,8 @@ public class ProtocolFilterWrapper implements Protocol {
 
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+        logger.info(logger.getStackString("hgb,ProtocolFilterWrapper.export"));
+
         if (UrlUtils.isRegistry(invoker.getUrl())) {
             return protocol.export(invoker);
         }

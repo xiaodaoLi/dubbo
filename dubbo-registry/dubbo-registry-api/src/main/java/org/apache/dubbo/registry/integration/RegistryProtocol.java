@@ -226,6 +226,8 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
     }
 
     private static void register(Registry registry, URL registeredProviderUrl) {
+        logger.info(logger.getStackString("hgb,RegistryProtocol.register"));
+
         ApplicationDeployer deployer = registeredProviderUrl.getOrDefaultApplicationModel().getDeployer();
         try {
             deployer.increaseServiceRefreshCount();
@@ -261,6 +263,8 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
      */
     @Override
     public <T> Exporter<T> export(final Invoker<T> originInvoker) throws RpcException {
+        logger.info(logger.getStackString("hgb,RegistryProtocol.export"));
+
         URL registryUrl = getRegistryUrl(originInvoker);
         // url to export locally
         URL providerUrl = getProviderUrl(originInvoker);
@@ -312,6 +316,8 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
     }
 
     private <T> void notifyExport(ExporterChangeableWrapper<T> exporter) {
+        logger.info(logger.getStackString("hgb,RegistryProtocol.notifyExport"));
+
         ScopeModel scopeModel = exporter.getRegisterUrl().getScopeModel();
         List<RegistryProtocolListener> listeners = ScopeModelUtil.getExtensionLoader(RegistryProtocolListener.class, scopeModel)
             .getActivateExtension(exporter.getOriginInvoker().getUrl(), REGISTRY_PROTOCOL_LISTENER_KEY);
@@ -333,10 +339,15 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
 
     @SuppressWarnings("unchecked")
     private <T> ExporterChangeableWrapper<T> doLocalExport(final Invoker<T> originInvoker, URL providerUrl) {
+        logger.info(logger.getStackString("hgb,RegistryProtocol.doLocalExport"));
+
         String providerUrlKey = getProviderUrlKey(originInvoker);
         String registryUrlKey = getRegistryUrlKey(originInvoker);
         Invoker<?> invokerDelegate = new InvokerDelegate<>(originInvoker, providerUrl);
 
+        //注意lambda表达式() -> protocol.export(invokerDelegate)
+        // export服务兜了一大圈又回来了
+        // 创建exporter
         ReferenceCountExporter<?> exporter = exporterFactory.createExporter(providerUrlKey, () -> protocol.export(invokerDelegate));
         return (ExporterChangeableWrapper<T>) bounds.computeIfAbsent(providerUrlKey, _k -> new ConcurrentHashMap<>())
             .computeIfAbsent(registryUrlKey, s -> {
@@ -443,12 +454,15 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
     }
 
     /**
+     * 获取注册信息
      * Get an instance of registry based on the address of invoker
      *
      * @param registryUrl
      * @return
      */
     protected Registry getRegistry(final URL registryUrl) {
+        logger.info(logger.getStackString("hgb,RegistryProtocol.getRegistry"));
+
         RegistryFactory registryFactory = ScopeModelUtil.getExtensionLoader(RegistryFactory.class, registryUrl.getScopeModel()).getAdaptiveExtension();
         return registryFactory.getRegistry(registryUrl);
     }
@@ -759,6 +773,8 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
 
         @Override
         public void register() {
+            logger.info(logger.getStackString("hgb,DestroyableExporter.register"));
+
             exporter.register();
         }
 
@@ -1002,6 +1018,8 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
 
         @Override
         public void register() {
+            logger.info(logger.getStackString("hgb,ExporterChangeableWrapper.register"));
+
             if (registered.compareAndSet(false, true)) {
                 URL registryUrl = getRegistryUrl(originInvoker);
                 Registry registry = getRegistry(registryUrl);

@@ -75,6 +75,8 @@ public class QosProtocolWrapper implements Protocol, ScopeModelAware {
 
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+        logger.info(logger.getStackString("hgb,QosProtocolWrapper.export"));
+
         startQosServer(invoker.getUrl());
         return protocol.export(invoker);
     }
@@ -97,6 +99,8 @@ public class QosProtocolWrapper implements Protocol, ScopeModelAware {
     }
 
     private void startQosServer(URL url) throws RpcException {
+        logger.info(logger.getStackString("hgb,QosProtocolWrapper.startQosServer"));
+
         boolean qosCheck = url.getParameter(QOS_CHECK, false);
 
         try {

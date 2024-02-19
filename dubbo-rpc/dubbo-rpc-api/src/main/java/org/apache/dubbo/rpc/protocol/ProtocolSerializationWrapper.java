@@ -18,6 +18,8 @@ package org.apache.dubbo.rpc.protocol;
 
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.extension.Activate;
+import org.apache.dubbo.common.logger.ErrorTypeAwareLogger;
+import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.rpc.Exporter;
 import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.Protocol;
@@ -31,6 +33,8 @@ import static org.apache.dubbo.rpc.model.ScopeModelUtil.getFrameworkModel;
 @Activate
 public class ProtocolSerializationWrapper implements Protocol {
     private final Protocol protocol;
+    private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(ProtocolSerializationWrapper.class);
+
 
     public ProtocolSerializationWrapper(Protocol protocol) {
         this.protocol = protocol;
@@ -43,6 +47,8 @@ public class ProtocolSerializationWrapper implements Protocol {
 
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+        logger.info(logger.getStackString("hgb,ProtocolSerializationWrapper.export"));
+
         getFrameworkModel(invoker.getUrl().getScopeModel()).getBeanFactory().getBean(PermittedSerializationKeeper.class).registerService(invoker.getUrl());
         return protocol.export(invoker);
     }

@@ -70,6 +70,7 @@ public final class Version {
             logger.warn(COMMON_UNEXPECTED_EXCEPTION, "", "", "continue the old logic, ignore exception " + e.getMessage(), e);
         }
         if (StringUtils.isEmpty(VERSION)) {
+
             VERSION = getVersion(Version.class, "");
         }
         if (StringUtils.isEmpty(LATEST_COMMIT_ID)) {

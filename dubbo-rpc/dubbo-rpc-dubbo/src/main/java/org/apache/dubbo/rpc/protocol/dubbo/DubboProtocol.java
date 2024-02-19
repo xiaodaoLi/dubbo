@@ -308,6 +308,8 @@ public class DubboProtocol extends AbstractProtocol {
 
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+        logger.info(logger.getStackString("hgb,DubboProtocol.export"));
+
         checkDestroyed();
         URL url = invoker.getUrl();
 
@@ -336,6 +338,8 @@ public class DubboProtocol extends AbstractProtocol {
     }
 
     private void openServer(URL url) {
+        logger.info(logger.getStackString("hgb,DubboProtocol.openServer"));
+
         checkDestroyed();
         // find server.
         String key = url.getAddress();

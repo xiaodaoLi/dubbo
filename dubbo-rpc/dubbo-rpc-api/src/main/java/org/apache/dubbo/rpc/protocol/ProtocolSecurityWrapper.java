@@ -57,6 +57,8 @@ public class ProtocolSecurityWrapper implements Protocol {
 
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+        logger.info(logger.getStackString("hgb,ProtocolSecurityWrapper.export"));
+
         try {
             ServiceModel serviceModel = invoker.getUrl().getServiceModel();
             ScopeModel scopeModel = invoker.getUrl().getScopeModel();

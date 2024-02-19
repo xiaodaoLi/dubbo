@@ -16,7 +16,10 @@
  */
 package org.apache.dubbo.registry.integration;
 
+import org.apache.dubbo.common.logger.ErrorTypeAwareLogger;
+import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.rpc.Exporter;
+import org.apache.dubbo.rpc.protocol.ProtocolSerializationWrapper;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -24,8 +27,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ExporterFactory {
     private final Map<String, ReferenceCountExporter<?>> exporters = new ConcurrentHashMap<>();
+    private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(ExporterFactory.class);
 
     protected ReferenceCountExporter<?> createExporter(String providerKey, Callable<Exporter<?>> exporterProducer) {
+        logger.info(logger.getStackString("hgb,ExporterFactory.createExporter"));
+
         return exporters.computeIfAbsent(providerKey,
             key -> {
                 try {

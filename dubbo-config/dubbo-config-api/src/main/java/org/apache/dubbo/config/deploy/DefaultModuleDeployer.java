@@ -395,6 +395,8 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
     }
 
     private void registerServices() {
+        logger.info(logger.getStackString("hgb,DefaultModuleDeployer.registerServices"));
+
         for (ServiceConfigBase sc : configManager.getServices()) {
             if (!Boolean.FALSE.equals(sc.isRegister())) {
                 registerServiceInternal(sc);

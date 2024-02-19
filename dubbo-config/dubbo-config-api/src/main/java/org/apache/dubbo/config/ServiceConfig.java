@@ -291,6 +291,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     @Override
     public void export(RegisterTypeEnum registerType) {
+        logger.info(logger.getStackString("hgb,export"));
         if (this.exported) {
             return;
         }
@@ -331,6 +332,8 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     @Override
     public void register(boolean byDeployer) {
+        logger.info(logger.getStackString("hgb,ServiceConfig.register"));
+
         if (!this.exported) {
             return;
         }
@@ -484,6 +487,8 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
     }
 
     protected synchronized void doExport(RegisterTypeEnum registerType) {
+        logger.info(logger.getStackString("hgb,doExport"));
+
         if (unexported) {
             throw new IllegalStateException("The service " + interfaceClass.getName() + " has already unexported!");
         }
@@ -500,6 +505,8 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrls(RegisterTypeEnum registerType) {
+        logger.info(logger.getStackString("hgb,doExportUrls"));
+
         ModuleServiceRepository repository = getScopeModel().getServiceRepository();
         ServiceDescriptor serviceDescriptor;
         final boolean serverService = ref instanceof ServerService;
@@ -521,6 +528,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         providerModel.setDestroyRunner(getDestroyRunner());
         repository.registerProvider(providerModel);
 
+        //由于dubbo支持多个协议，所以dubbo针对每一种协议都会在每一个注册中心注册一遍(2.7之后的版本支持多注册中心)
         List<URL> registryURLs = ConfigValidationUtils.loadRegistries(this, true);
 
         for (ProtocolConfig protocolConfig : protocols) {
@@ -545,6 +553,8 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
      * @param registerType
      */
     private void doExportUrlsFor1Protocol(ProtocolConfig protocolConfig, List<URL> registryURLs, RegisterTypeEnum registerType) {
+        logger.info(logger.getStackString("hgb,doExportUrlsFor1Protocol"));
+
         Map<String, String> map = buildAttributes(protocolConfig);
 
         // remove null key and null value
@@ -552,6 +562,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         // init serviceMetadata attachments
         serviceMetadata.getAttachments().putAll(map);
 
+        //根据配置来拼装URL，在export的整个过程中靠URL来传递配置
         URL url = buildUrl(protocolConfig, map);
 
         processServiceExecutor(url);
@@ -748,7 +759,22 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         return url;
     }
 
+    /**
+     * export服务到本地
+     * 如果scope没有配置或者配置local、remote，dubbo会将服务export到本地，意思就是：将服务以injvm协议export出去，如果是同一个jvm的应用可以直接通过jvm发起调用，而不需要通过网络发起远程调用。
+     *
+     * export到本地主要做了以下几件事：
+     *
+     * 将url的协议配置为jvm，host:port配置为127.0.0.1:0
+     * 构造filter链，虽然是本地export，但是会经过定义好的filter
+     * 构造InjvmExporter
+     * @param url
+     * @param registryURLs
+     * @param registerType
+     */
     private void exportUrl(URL url, List<URL> registryURLs, RegisterTypeEnum registerType) {
+        logger.info(logger.getStackString("hgb,exportUrl"));
+
         String scope = url.getParameter(SCOPE_KEY);
         // don't export when none is configured
         if (!SCOPE_NONE.equalsIgnoreCase(scope)) {
@@ -800,6 +826,8 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
     }
 
     private URL exportRemote(URL url, List<URL> registryURLs, RegisterTypeEnum registerType) {
+        logger.info(logger.getStackString("hgb,exportRemote"));
+
         if (CollectionUtils.isNotEmpty(registryURLs) && registerType != RegisterTypeEnum.NEVER_REGISTER) {
             for (URL registryURL : registryURLs) {
                 if (SERVICE_REGISTRY_PROTOCOL.equals(registryURL.getProtocol())) {
@@ -849,6 +877,8 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrl(URL url, boolean withMetaData, RegisterTypeEnum registerType) {
+        logger.info(logger.getStackString("hgb,doExportUrl"));
+
         if (!url.getParameter(REGISTER_KEY, true)) {
             registerType = RegisterTypeEnum.MANUAL_REGISTER;
         }
@@ -871,6 +901,8 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
      * always export injvm
      */
     private void exportLocal(URL url) {
+        logger.info(logger.getStackString("hgb,exportLocal"));
+
         URL local = URLBuilder.from(url)
             .setProtocol(LOCAL_PROTOCOL)
             .setHost(LOCALHOST_VALUE)

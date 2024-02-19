@@ -18,6 +18,8 @@ package org.apache.dubbo.rpc.protocol;
 
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.extension.Activate;
+import org.apache.dubbo.common.logger.ErrorTypeAwareLogger;
+import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.common.utils.UrlUtils;
 import org.apache.dubbo.rpc.Exporter;
 import org.apache.dubbo.rpc.Invoker;
@@ -27,6 +29,7 @@ import org.apache.dubbo.rpc.RpcException;
 @Activate(order = Integer.MIN_VALUE + 1000)
 public class InvokerCountWrapper implements Protocol {
     private final Protocol protocol;
+    private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(InvokerCountWrapper.class);
 
     public InvokerCountWrapper(Protocol protocol) {
         this.protocol = protocol;
@@ -39,6 +42,7 @@ public class InvokerCountWrapper implements Protocol {
 
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+        logger.info(logger.getStackString("hgb,InvokerCountWrapper.export"));
         return protocol.export(invoker);
     }
 
