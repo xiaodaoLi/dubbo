@@ -538,6 +538,12 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         providerModel.setServiceUrls(urls);
     }
 
+    /**
+     * 基于协议暴露服务
+     * @param protocolConfig
+     * @param registryURLs
+     * @param registerType
+     */
     private void doExportUrlsFor1Protocol(ProtocolConfig protocolConfig, List<URL> registryURLs, RegisterTypeEnum registerType) {
         Map<String, String> map = buildAttributes(protocolConfig);
 

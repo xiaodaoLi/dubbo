@@ -55,17 +55,25 @@ public class ListenerRegistryWrapper implements Registry {
         registry.destroy();
     }
 
+    /**
+     * 注册完成后，将触发所有对注册事件的监听
+     * @param url  Registration information , is not allowed to be empty, e.g: dubbo://10.20.153.10/org.apache.dubbo.foo.BarService?version=1.0.0&application=kylin
+     */
     @Override
     public void register(URL url) {
         try {
             if (registry != null) {
+                // 注册服务
                 registry.register(url);
+                logger.info(String.format("Register service: %s to registry: %s", url, registry.getUrl()));
             }
         } finally {
+            // 监听事件
             if (!UrlUtils.isConsumer(url)) {
                 listenerEvent(serviceListener -> serviceListener.onRegister(url, registry));
             }
         }
+        logger.info(logger.getStackString("register call stack"));
     }
 
     @Override
