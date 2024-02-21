@@ -211,13 +211,17 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
             }
             onInitialize();
 
+            //注册关闭钩子，这个逻辑基本每个中间件应用都必须要要做的事情了，正常关闭应用回收资源，一般没这个逻辑情况下容易出现一些异常，让我们开发人员很疑惑，而这个逻辑往往并不好处理的干净。
             // register shutdown hook
             registerShutdownHook();
 
+            //启动配置中心
             startConfigCenter();
 
+            //加载配置，一般配置信息当前机器的来源：环境变量，JVM启动参数，配置文件
             loadApplicationConfigs();
 
+            //初始化模块发布器 （发布服务提供和服务引用使用）
             initModuleDeployers();
 
 
@@ -226,8 +230,10 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
             initMetricsService();
 
             // @since 2.7.8
+            // 启动元数据中心
             startMetadataCenter();
 
+            //初始化完成
             initialized = true;
 
             if (logger.isInfoEnabled()) {
@@ -656,13 +662,16 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
                     return CompletableFuture.completedFuture(false);
                 }
 
+                //启动状态切换，将启动状态切换到STARTING（pending和started状态无需切换）
                 // pending -> starting : first start app
                 // started -> starting : re-start app
                 onStarting();
 
+                //应用的初始化逻辑，例如配置中心、元数据中心的初始化
                 initialize();
-
+                //启动模块（我们的服务提供和服务引用是在这个模块级别的）
                 doStart();
+
             } catch (Throwable e) {
                 onFailed(getIdentifier() + " start failure", e);
                 throw e;
@@ -689,6 +698,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     }
 
     private void doStart() {
+        //启动各个模块
         startModules();
 
         // prepare application instance
@@ -719,9 +729,15 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     }
 
     private void startModules() {
+        //内部服务有个元数据服务，Dubbo3中每个服务都可以对外提供服务的元数据信息，来简化服务配置。
+        // 不论是内部服务还是外部服务调用的代码逻辑都是模块发布器ModuleDeployer的start()方法
+
         // ensure init and start internal module first
+        //确保初始化并首先启动内部模块,Dubbo3中将模块分为内部和外部
+        //内部是核心代码已经提供的一些服务比如元数据服务，外部是我们自己写的服务
         prepareInternalModule();
 
+        //启动所有的模块 （启动所有的服务）
         // filter and start pending modules, ignore new module during starting, throw exception of module start
         for (ModuleModel moduleModel : applicationModel.getModuleModels()) {
             if (moduleModel.getDeployer().isPending()) {
