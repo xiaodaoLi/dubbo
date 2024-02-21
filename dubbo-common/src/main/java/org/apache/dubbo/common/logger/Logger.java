@@ -16,6 +16,8 @@
  */
 package org.apache.dubbo.common.logger;
 
+import java.util.Arrays;
+
 /**
  * Logger interface
  * <p>
@@ -26,16 +28,16 @@ public interface Logger {
     /**
      * 获取堆栈跟踪信息的字符串表示
      *
-     * @param msg log this message
+     * @param msgs log this message
      * @return 堆栈跟踪信息的字符串表示
      */
-    default String getStackString(String msg) {
+    default String getStackString(String... msgs) {
         // 创建一个Throwable实例来获取堆栈跟踪
         Throwable throwable = new Throwable();
         StackTraceElement[] stackTraceElements = throwable.getStackTrace();
 
         // 使用StringBuilder来构建堆栈跟踪信息的字符串表示
-        StringBuilder sb = new StringBuilder(msg);
+        StringBuilder sb = new StringBuilder(Arrays.toString(msgs));
         sb.append("\n");
         sb.append("Current stack trace:\n");
         for (StackTraceElement element : stackTraceElements) {

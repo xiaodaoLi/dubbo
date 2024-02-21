@@ -82,6 +82,7 @@ public class ProtocolSecurityWrapper implements Protocol {
         } catch (Throwable t) {
             logger.error(INTERNAL_ERROR, "", "", "Failed to register interface for security check", t);
         }
+        // todo hgb 接下来往哪走？
         return protocol.export(invoker);
     }
 

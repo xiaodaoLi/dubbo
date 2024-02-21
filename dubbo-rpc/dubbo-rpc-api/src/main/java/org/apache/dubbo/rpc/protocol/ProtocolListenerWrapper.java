@@ -77,6 +77,7 @@ public class ProtocolListenerWrapper implements Protocol {
         if (LOCAL_PROTOCOL.equals(invoker.getUrl().getProtocol())) {
             exporterListeners.add(invoker.getUrl().getOrDefaultFrameworkModel().getBeanFactory().getBean(InjvmExporterListener.class));
         }
+        //protocol.export(invoker)注意这个
         return new ListenerExporterWrapper<T>(protocol.export(invoker),
                 Collections.unmodifiableList(exporterListeners));
     }

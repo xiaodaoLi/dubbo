@@ -291,11 +291,17 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     @Override
     public void export(RegisterTypeEnum registerType) {
-        logger.info(logger.getStackString("hgb,export"));
+        logger.info(logger.getStackString("hgb,ServiceConfig.export"));
         if (this.exported) {
             return;
         }
+        /**
+         * 服务暴露与服务注册时两回事。
+         * 服务暴露是指绑定网络端口，开启网络服务。
+         * 服务注册时指在注册中心写入记录，让其他主机能够进行调用。调用的前提是服务已经暴露了，
+         */
 
+        // 生命周期支持由外部进行管理（由外部框架管理。例如Spring），便于与其他框架结合。
         if (getScopeModel().isLifeCycleManagedExternally()) {
             // prepare model for reference
             getScopeModel().getDeployer().prepare();
@@ -487,7 +493,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
     }
 
     protected synchronized void doExport(RegisterTypeEnum registerType) {
-        logger.info(logger.getStackString("hgb,doExport"));
+        logger.info(logger.getStackString("hgb,ServiceConfig.doExport"));
 
         if (unexported) {
             throw new IllegalStateException("The service " + interfaceClass.getName() + " has already unexported!");
@@ -781,6 +787,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
             // export to local if the config is not remote (export to remote only when config is remote)
             if (!SCOPE_REMOTE.equalsIgnoreCase(scope)) {
+                // 暴露到本地 injvm
                 exportLocal(url);
             }
 
@@ -892,6 +899,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         if (withMetaData) {
             invoker = new DelegateProviderMetaDataInvoker(invoker, this);
         }
+        // 动态代理 Protocol$Adaptive
         Exporter<?> exporter = protocolSPI.export(invoker);
         exporters.computeIfAbsent(registerType, k -> new CopyOnWriteArrayList<>()).add(exporter);
     }

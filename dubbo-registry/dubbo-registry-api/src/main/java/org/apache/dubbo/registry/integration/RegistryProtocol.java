@@ -310,6 +310,7 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
             }
         }
 
+        // 监听服务注册（暴露）
         notifyExport(exporter);
         //Ensure that a new exporter instance is returned every time export
         return new DestroyableExporter<>(exporter);

@@ -75,6 +75,7 @@ public class InjvmProtocol extends AbstractProtocol {
 
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+        logger.info(logger.getStackString("hgb,InjvmProtocol.export"));
         return new InjvmExporter<T>(invoker, invoker.getUrl().getServiceKey(), exporterMap);
     }
 

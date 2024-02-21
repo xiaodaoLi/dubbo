@@ -142,6 +142,8 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
 
     @Override
     public Future start() throws IllegalStateException {
+        logger.info(logger.getStackString("hgb,DefaultModuleDeployer.start"));
+
         // initialize，maybe deadlock applicationDeployer lock & moduleDeployer lock
         applicationDeployer.initialize();
 
@@ -160,10 +162,11 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
 
             onModuleStarting();
 
-
+            //模块发布器进行初始化。前面初始化的是应用发布器
             initialize();
 
             // export services
+            // 暴露服务
             exportServices();
 
             // prepare application instance
@@ -173,9 +176,11 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
             }
 
             // refer services
+            // 引用服务
             referServices();
 
             // if no async export/refer services, just set started
+            // 非异步启动直接切换状态为started
             if (asyncExportingFutures.isEmpty() && asyncReferringFutures.isEmpty()) {
                 // publish module started event
                 onModuleStarted();
@@ -189,6 +194,7 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
                 // complete module start future after application state changed
                 completeStartFuture(true);
             } else {
+                // 如果是异步启动则等待异步启动和服务引用回调
                 frameworkExecutorRepository.getSharedExecutor().submit(() -> {
                     try {
                         // wait for export finish
@@ -318,6 +324,9 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
         }
     }
 
+    /**
+     * 切换模块启动状态为starting，并通知所有的状态监听器
+     */
     private void onModuleStarting() {
         setStarting();
         startFuture = new CompletableFuture();
@@ -389,6 +398,7 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
     }
 
     private void exportServices() {
+
         for (ServiceConfigBase sc : configManager.getServices()) {
             exportServiceInternal(sc);
         }
@@ -444,6 +454,7 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
     }
 
     private void registerServiceInternal(ServiceConfigBase sc) {
+        logger.info(logger.getStackString("hgb,DefaultModuleDeployer.registerServiceInternal"));
         ServiceConfig<?> serviceConfig = (ServiceConfig<?>) sc;
         if (!serviceConfig.isRefreshed()) {
             serviceConfig.refresh();

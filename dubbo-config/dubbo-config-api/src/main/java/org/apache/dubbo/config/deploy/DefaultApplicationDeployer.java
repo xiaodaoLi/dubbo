@@ -633,7 +633,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
 
     /**
      * Start the bootstrap
-     *
+     * 启动的入口
      * @return
      */
     @Override
@@ -741,6 +741,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
         // filter and start pending modules, ignore new module during starting, throw exception of module start
         for (ModuleModel moduleModel : applicationModel.getModuleModels()) {
             if (moduleModel.getDeployer().isPending()) {
+                //模块启动器，发布服务
                 moduleModel.getDeployer().start();
             }
         }

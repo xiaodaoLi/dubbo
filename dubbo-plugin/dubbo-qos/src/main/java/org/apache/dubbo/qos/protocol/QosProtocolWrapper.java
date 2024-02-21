@@ -77,6 +77,7 @@ public class QosProtocolWrapper implements Protocol, ScopeModelAware {
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
         logger.info(logger.getStackString("hgb,QosProtocolWrapper.export"));
 
+        //暴露服务的同时顺带开启QOS服务
         startQosServer(invoker.getUrl());
         return protocol.export(invoker);
     }

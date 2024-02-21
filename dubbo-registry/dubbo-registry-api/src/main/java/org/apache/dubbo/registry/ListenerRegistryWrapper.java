@@ -64,6 +64,7 @@ public class ListenerRegistryWrapper implements Registry {
         try {
             if (registry != null) {
                 // 注册服务
+                logger.info("source type of register is " + registry.getClass().getName());
                 registry.register(url);
                 logger.info(String.format("Register service: %s to registry: %s", url, registry.getUrl()));
             }

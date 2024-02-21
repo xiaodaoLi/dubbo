@@ -162,6 +162,7 @@ public class ZookeeperRegistry extends CacheableFailbackRegistry {
         } catch (Throwable e) {
             throw new RpcException("Failed to register " + url + " to zookeeper " + getUrl() + ", cause: " + e.getMessage(), e);
         }
+        logger.info(logger.getStackString("hgb ,doRegister zk",toUrlPath(url)));
     }
 
     @Override

@@ -68,8 +68,16 @@ public abstract class AbstractZookeeperClient<TargetDataListener, TargetChildLis
         deletePath(path);
     }
 
+    /**
+     * 递归创建节点
+     * @param path path to ZNode
+     * @param ephemeral specify create mode of ZNode creation. true - EPHEMERAL, false - PERSISTENT.
+     * @param faultTolerant specify fault tolerance of ZNode creation.
+     *                       true - ignore exception and recreate if is ephemeral, false - throw exception.
+     */
     @Override
     public void create(String path, boolean ephemeral, boolean faultTolerant) {
+        logger.info(logger.getStackString("hgb ,create zk node", path));
         if (!ephemeral) {
             if (persistentExistNodePath.contains(path)) {
                 return;
