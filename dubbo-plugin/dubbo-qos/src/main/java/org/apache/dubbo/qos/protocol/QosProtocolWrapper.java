@@ -60,6 +60,8 @@ public class QosProtocolWrapper implements Protocol, ScopeModelAware {
         if (protocol == null) {
             throw new IllegalArgumentException("protocol == null");
         }
+        logger.info(logger.getStackString("hgb,QosProtocolWrapper(Protocol protocol) ", protocol.getClass().getName()));
+
         this.protocol = protocol;
     }
 

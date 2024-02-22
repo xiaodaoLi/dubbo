@@ -919,6 +919,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         local = local.setScopeModel(getScopeModel())
             .setServiceModel(providerModel);
         local = local.addParameter(EXPORTER_LISTENER_KEY, LOCAL_PROTOCOL);
+        //injvm://
         doExportUrl(local, false, RegisterTypeEnum.AUTO_REGISTER);
         logger.info("Export dubbo service " + interfaceClass.getName() + " to local registry url : " + local);
     }

@@ -308,6 +308,7 @@ public class DubboProtocol extends AbstractProtocol {
 
     @Override
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
+        // openServer 开启服务
         logger.info(logger.getStackString("hgb,DubboProtocol.export"));
 
         checkDestroyed();
@@ -370,6 +371,8 @@ public class DubboProtocol extends AbstractProtocol {
     }
 
     private ProtocolServer createServer(URL url) {
+        logger.info(logger.getStackString("hgb,DubboProtocol.createServer"));
+
         url = URLBuilder.from(url)
             // send readonly event when server closes, it's enabled by default
             .addParameterIfAbsent(CHANNEL_READONLYEVENT_SENT_KEY, Boolean.TRUE.toString())
@@ -377,7 +380,7 @@ public class DubboProtocol extends AbstractProtocol {
             .addParameterIfAbsent(HEARTBEAT_KEY, String.valueOf(DEFAULT_HEARTBEAT))
             .addParameter(CODEC_KEY, DubboCodec.NAME)
             .build();
-
+        logger.info(logger.getStackString("hgb,DubboProtocol.createServer", url.toFullString()));
         String transporter = url.getParameter(SERVER_KEY, DEFAULT_REMOTING_SERVER);
         if (StringUtils.isNotEmpty(transporter) && !url.getOrDefaultFrameworkModel().getExtensionLoader(Transporter.class).hasExtension(transporter)) {
             throw new RpcException("Unsupported server type: " + transporter + ", url: " + url);

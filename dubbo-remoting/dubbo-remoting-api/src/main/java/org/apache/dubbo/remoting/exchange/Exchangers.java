@@ -17,6 +17,8 @@
 package org.apache.dubbo.remoting.exchange;
 
 import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.logger.ErrorTypeAwareLogger;
+import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.remoting.ChannelHandler;
 import org.apache.dubbo.remoting.Constants;
 import org.apache.dubbo.remoting.RemotingException;
@@ -28,6 +30,8 @@ import org.apache.dubbo.remoting.transport.ChannelHandlerAdapter;
  * Exchanger facade. (API, Static, ThreadSafe)
  */
 public class Exchangers {
+    protected final static ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(Exchangers.class);
+
     private Exchangers() {
     }
 
@@ -52,6 +56,8 @@ public class Exchangers {
     }
 
     public static ExchangeServer bind(URL url, ExchangeHandler handler) throws RemotingException {
+        logger.info(logger.getStackString("hgb,Exchangers.bind"));
+
         if (url == null) {
             throw new IllegalArgumentException("url == null");
         }
