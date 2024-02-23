@@ -44,6 +44,7 @@ import static org.apache.dubbo.rpc.Constants.LOCAL_PROTOCOL;
 
 /**
  * ListenerProtocol
+ * 用于服务取消暴露时触发事件。
  */
 @Activate(order = 200)
 public class ProtocolListenerWrapper implements Protocol {

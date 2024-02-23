@@ -23,6 +23,10 @@ import org.apache.dubbo.common.extension.SPI;
 
 /**
  * Transporter. (SPI, Singleton, ThreadSafe)
+ *
+ * ransporter是Dubbo对网络传输层的抽象接口，默认使用Netty，其他还有如Mina、Grizzly等，
+ * Transporter实现也是通过SPI自适应加载的，可以通过参数server或transporter指定。
+ *
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Transport_Layer">Transport Layer</a>
  * <a href="http://en.wikipedia.org/wiki/Client%E2%80%93server_model">Client/Server</a>

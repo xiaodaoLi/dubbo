@@ -1,0 +1,20 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+title : Dubbo服务暴露时序图
+
+autonumber
+
+DubboBootstrap -> DefaultApplicationDeployer: DubboBootstrap.start()
+DefaultApplicationDeployer --> DefaultApplicationDeployer: doStart()
+DefaultApplicationDeployer --> DefaultApplicationDeployer: startModules()
+DefaultApplicationDeployer --> DefaultApplicationDeployer: prepareInternalModule()
+DefaultApplicationDeployer --> ModuleDeployer: start() (internal module)
+ModuleDeployer --> DefaultModuleDeployer: start() (internal module)
+DefaultModuleDeployer --> DefaultModuleDeployer: exportServices() (internal module)
+DefaultModuleDeployer --> DefaultModuleDeployer: exportServiceInternal(ServiceConfigBase) (internal module)
+DefaultModuleDeployer --> ServiceConfigBase: sc.export()
+ServiceConfigBase --> ServiceConfig: export() 继承后重写的方法
+ServiceConfig --> DefaultModuleDeployer: start() 继承后重写的方法
+
+
+@enduml

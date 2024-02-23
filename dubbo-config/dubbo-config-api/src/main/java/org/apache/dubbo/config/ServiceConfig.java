@@ -413,8 +413,16 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
             mappingRetryInterval == null ? 5000 : mappingRetryInterval, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * 检查和更新配置
+     * 该方法主要是对ServiceConfig对象做一些配置的校验和自动更新。
+     * 例如使用ProviderConfig的全局默认配置、将protocolIds转换成ProtocolConfig对象、自身的属性按照优先级进行刷新等等。
+     * 配置更新完了，接下来就是做服务暴露的前置Check，例如注册中心是否有效、ref对象是否符合要求等等。
+     *
+     * <a href="https://blog.csdn.net/qq_32099833/article/details/121863474">原文链接：</a>
+     */
     private void checkAndUpdateSubConfigs() {
-
+        logger.info(logger.getStackString("ServiceConfig.checkAndUpdateSubConfigs"));
         // Use default configs defined explicitly with global scope
         completeCompoundConfigs();
 
@@ -488,6 +496,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     @Override
     protected void postProcessRefresh() {
+        logger.info(logger.getStackString("ServiceConfig.postProcessRefresh"));
         super.postProcessRefresh();
         checkAndUpdateSubConfigs();
     }
@@ -513,6 +522,10 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
     private void doExportUrls(RegisterTypeEnum registerType) {
         logger.info(logger.getStackString("hgb,doExportUrls"));
 
+        /**
+         * ServiceRepository保存了当前应用提供了哪些服务、引用了哪些服务。
+         * 后续Consumer服务引用时，如果自身已经提供了该服务，就会通过ServiceRepository直接引用本地提供的服务，跳过网络传输
+         */
         ModuleServiceRepository repository = getScopeModel().getServiceRepository();
         ServiceDescriptor serviceDescriptor;
         final boolean serverService = ref instanceof ServerService;
@@ -534,10 +547,12 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         providerModel.setDestroyRunner(getDestroyRunner());
         repository.registerProvider(providerModel);
 
+        // 查看需要注册到哪些注册中心，2.7版本之后支持同时往多个注册中心中进行注册
         //由于dubbo支持多个协议，所以dubbo针对每一种协议都会在每一个注册中心注册一遍(2.7之后的版本支持多注册中心)
         List<URL> registryURLs = ConfigValidationUtils.loadRegistries(this, true);
 
         for (ProtocolConfig protocolConfig : protocols) {
+            // for循环遍历协议，对每个协议多注册中心注册
             String pathKey = URL.buildKey(getContextPath(protocolConfig)
                 .map(p -> p + "/" + path)
                 .orElse(path), group, version);
@@ -561,6 +576,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
     private void doExportUrlsFor1Protocol(ProtocolConfig protocolConfig, List<URL> registryURLs, RegisterTypeEnum registerType) {
         logger.info(logger.getStackString("hgb,doExportUrlsFor1Protocol"));
 
+        // 组装配置参数，用于构建URL
         Map<String, String> map = buildAttributes(protocolConfig);
 
         // remove null key and null value
@@ -568,7 +584,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         // init serviceMetadata attachments
         serviceMetadata.getAttachments().putAll(map);
 
-        //根据配置来拼装URL，在export的整个过程中靠URL来传递配置
+        //根据前面buildAttributes组装的配置来拼装URL，在export的整个过程中靠URL来传递配置
         URL url = buildUrl(protocolConfig, map);
 
         processServiceExecutor(url);
@@ -603,8 +619,13 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         }
     }
 
+    /**
+     * 构建服务暴露所需要的各种属性（参数）
+     * @param protocolConfig
+     * @return
+     */
     private Map<String, String> buildAttributes(ProtocolConfig protocolConfig) {
-
+        logger.info(logger.getStackString("hgb,ServiceConfig.buildAttributes"));
         Map<String, String> map = new HashMap<String, String>();
         map.put(SIDE_KEY, PROVIDER_SIDE);
 
@@ -619,6 +640,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         AbstractConfig.appendParameters(map, this);
         appendMetricsCompatible(map);
 
+        // 服务的配置粒度细化到方法级别，如果方法级别有配置，也需要加入到参数map中
         // append params with method configs,
         if (CollectionUtils.isNotEmpty(getMethods())) {
             getMethods().forEach(method -> appendParametersWithMethod(method, map));
@@ -895,6 +917,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
             url = url.addParameter(REGISTER_KEY, false);
         }
 
+        // 动态代理，不同的协议创建不同的invoker
         Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, url);
         if (withMetaData) {
             invoker = new DelegateProviderMetaDataInvoker(invoker, this);
@@ -910,12 +933,17 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
      */
     private void exportLocal(URL url) {
         logger.info(logger.getStackString("hgb,exportLocal"));
-
+        logger.info("URL输入"+url.toFullString());
+        // 改写协议为injvm，port为-1，不开启端口监听，不走网络传输
         URL local = URLBuilder.from(url)
+            //injvm
             .setProtocol(LOCAL_PROTOCOL)
+            //127.0.0.1
             .setHost(LOCALHOST_VALUE)
+            // 不开启端口监听
             .setPort(0)
             .build();
+        logger.info("生成的URL"+url.toFullString());
         local = local.setScopeModel(getScopeModel())
             .setServiceModel(providerModel);
         local = local.addParameter(EXPORTER_LISTENER_KEY, LOCAL_PROTOCOL);

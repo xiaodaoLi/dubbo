@@ -332,7 +332,16 @@ public class DubboProtocol extends AbstractProtocol {
             }
         }
 
+        /**
+         * 同一个address，不管暴露多少服务，都只会也只能开启一个服务，所以会用address作为Key，将服务端缓存到Map容器，address不存在时，才会调用createServer()创建ProtocolServer。
+         * 创建服务需要绑定本地端口，最终调用的是Exchanger#bind()。Exchanger实现类会通过SPI自适应加载，目前只有一种实现类HeaderExchanger。
+         *
+         * 原文链接：https://blog.csdn.net/qq_32099833/article/details/121863474
+         */
+
+        // 开启服务
         openServer(url);
+        // 优化序列化效率
         optimizeSerialization(url);
 
         return exporter;
@@ -353,7 +362,10 @@ public class DubboProtocol extends AbstractProtocol {
                 synchronized (this) {
                     server = serverMap.get(key);
                     if (server == null) {
-                        serverMap.put(key, createServer(url));
+                        //默认的server使用的是netty
+                        //开启服务器，绑定端口
+                        //至此，Provider就开始监听网络请求了，服务的暴露就完成了。
+                        // 服务暴露之后，接下来是服务注册
                         return;
                     }
                 }
@@ -386,13 +398,18 @@ public class DubboProtocol extends AbstractProtocol {
             throw new RpcException("Unsupported server type: " + transporter + ", url: " + url);
         }
 
+        /**
+         * ExchangerServer依赖Transporter，
+         * Transporter是Dubbo对网络传输层的抽象接口，默认使用Netty，其他还有如Mina、Grizzly等，
+         * Transporter实现也是通过SPI自适应加载的，可以通过参数server或transporter指定
+         */
         ExchangeServer server;
         try {
             server = Exchangers.bind(url, requestHandler);
         } catch (RemotingException e) {
             throw new RpcException("Fail to start server(url: " + url + ") " + e.getMessage(), e);
         }
-
+        //Transporter org.apache.dubbo.remoting.Transporter
         transporter = url.getParameter(CLIENT_KEY);
         if (StringUtils.isNotEmpty(transporter) && !url.getOrDefaultFrameworkModel().getExtensionLoader(Transporter.class).hasExtension(transporter)) {
             throw new RpcException("Unsupported client type: " + transporter);

@@ -238,6 +238,7 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
                 .orElse("unknown");
             MetricsEventBus.post(RegistryEvent.toRsEvent(registeredProviderUrl.getApplicationModel(), registeredProviderUrl.getServiceKey(), 1, Collections.singletonList(registryName)),
                 () -> {
+                    // 注册服务
                     registry.register(registeredProviderUrl);
                     return null;
                 });
@@ -263,23 +264,34 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
      */
     @Override
     public <T> Exporter<T> export(final Invoker<T> originInvoker) throws RpcException {
-        logger.info(logger.getStackString("hgb,RegistryProtocol.export"));
+        logger.info(logger.getStackString("hgb,RegistryProtocol.export","暴露服务和注册服务"));
+        /**
+         * 首先从URL中分别提取出注册中心URL和服务暴露的真实URL。
+         * providerUrl才是服务暴露的真实协议地址，然后通过doLocalExport()方法开始根据指定的协议来暴露服务。
+         *
+         * 要区分服务的暴露和注册，暴露一般是指开始监听本地端口，对外提供服务。注册是指将服务注册到注册中心，让Consumer可以感知到。
+         */
 
+        // 注册中心URL，前面改写过协议，真实协议放到参数里去了，这里会还原
         URL registryUrl = getRegistryUrl(originInvoker);
         // url to export locally
+        // 服务提供者URL，这里会将协议改为dubbo
         URL providerUrl = getProviderUrl(originInvoker);
 
         // Subscribe the override data
         // FIXME When the provider subscribes, it will affect the scene : a certain JVM exposes the service and call
         //  the same service. Because the subscribed is cached key with the name of the service, it causes the
         //  subscription information to cover.
+        // 获取订阅的URL，URL变更服务会重新发布
         final URL overrideSubscribeUrl = getSubscribedOverrideUrl(providerUrl);
+        // 创建URL监听器
         final OverrideListener overrideSubscribeListener = new OverrideListener(overrideSubscribeUrl, originInvoker);
         Map<URL, Set<NotifyListener>> overrideListeners = getProviderConfigurationListener(overrideSubscribeUrl).getOverrideListeners();
         overrideListeners.computeIfAbsent(overrideSubscribeUrl, k -> new ConcurrentHashSet<>())
             .add(overrideSubscribeListener);
 
         providerUrl = overrideUrlWithConfig(providerUrl, overrideSubscribeListener);
+        // 1、暴露服务
         //export invoker
         final ExporterChangeableWrapper<T> exporter = doLocalExport(originInvoker, providerUrl);
 
@@ -290,6 +302,7 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
         // decide if we need to delay publish (provider itself and registry should both need to register)
         boolean register = providerUrl.getParameter(REGISTER_KEY, true) && registryUrl.getParameter(REGISTER_KEY, true);
         if (register) {
+            // 2、注册服务
             register(registry, registeredProviderUrl);
         }
 
@@ -352,6 +365,7 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
         ReferenceCountExporter<?> exporter = exporterFactory.createExporter(providerUrlKey, () -> protocol.export(invokerDelegate));
         return (ExporterChangeableWrapper<T>) bounds.computeIfAbsent(providerUrlKey, _k -> new ConcurrentHashMap<>())
             .computeIfAbsent(registryUrlKey, s -> {
+                // 这里才是真实的 根据URL协议加载Protocol服务暴露
                 return new ExporterChangeableWrapper<>(
                     (ReferenceCountExporter<T>) exporter, originInvoker);
             });

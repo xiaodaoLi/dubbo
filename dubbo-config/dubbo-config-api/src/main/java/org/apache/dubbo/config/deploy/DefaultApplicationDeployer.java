@@ -205,6 +205,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
             return;
         }
         // Ensure that the initialization is completed when concurrent calls
+        //
         synchronized (startLock) {
             if (initialized) {
                 return;
