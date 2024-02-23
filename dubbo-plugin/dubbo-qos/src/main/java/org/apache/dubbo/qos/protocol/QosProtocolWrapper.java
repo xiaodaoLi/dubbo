@@ -81,6 +81,7 @@ public class QosProtocolWrapper implements Protocol, ScopeModelAware {
 
         //暴露服务的同时顺带开启QOS服务
         startQosServer(invoker.getUrl());
+        // 这里的protocol会从RegistryProtocol 变成DubboProtocol
         return protocol.export(invoker);
     }
 

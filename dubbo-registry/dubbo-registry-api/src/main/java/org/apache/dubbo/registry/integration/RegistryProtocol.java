@@ -70,6 +70,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -362,13 +363,22 @@ public class RegistryProtocol implements Protocol, ScopeModelAware {
         //注意lambda表达式() -> protocol.export(invokerDelegate)
         // export服务兜了一大圈又回来了
         // 创建exporter
-        ReferenceCountExporter<?> exporter = exporterFactory.createExporter(providerUrlKey, () -> protocol.export(invokerDelegate));
+        ReferenceCountExporter<?> exporter = exporterFactory.createExporter(providerUrlKey, getExporterCallable(invokerDelegate));
         return (ExporterChangeableWrapper<T>) bounds.computeIfAbsent(providerUrlKey, _k -> new ConcurrentHashMap<>())
             .computeIfAbsent(registryUrlKey, s -> {
                 // 这里才是真实的 根据URL协议加载Protocol服务暴露
                 return new ExporterChangeableWrapper<>(
                     (ReferenceCountExporter<T>) exporter, originInvoker);
             });
+    }
+
+    /**
+     * callable 回调
+     * @param invokerDelegate
+     * @return
+     */
+    private Callable<Exporter<?>> getExporterCallable(Invoker<?> invokerDelegate) {
+        return () -> protocol.export(invokerDelegate);
     }
 
     public <T> void reExport(Exporter<T> exporter, URL newInvokerUrl) {

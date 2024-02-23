@@ -30,11 +30,13 @@ public class ExporterFactory {
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(ExporterFactory.class);
 
     protected ReferenceCountExporter<?> createExporter(String providerKey, Callable<Exporter<?>> exporterProducer) {
-        logger.info(logger.getStackString("hgb,ExporterFactory.createExporter"));
 
         return exporters.computeIfAbsent(providerKey,
             key -> {
                 try {
+                    logger.info("hgb,ExporterFactory.createExporter");
+                    //exporterProducer.call() 真正触发Exporter里面的protocol的export()方法
+                    // 直接调用Callable的call方法并不会开启新的线程
                     return new ReferenceCountExporter<>(exporterProducer.call(), key, this);
                 } catch (Exception e) {
                     throw new RuntimeException(e);

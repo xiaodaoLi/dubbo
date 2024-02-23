@@ -14,7 +14,29 @@ DefaultModuleDeployer --> DefaultModuleDeployer: exportServices() (internal modu
 DefaultModuleDeployer --> DefaultModuleDeployer: exportServiceInternal(ServiceConfigBase) (internal module)
 DefaultModuleDeployer --> ServiceConfigBase: sc.export()
 ServiceConfigBase --> ServiceConfig: export() 继承后重写的方法
-ServiceConfig --> DefaultModuleDeployer: start() 继承后重写的方法
+ServiceConfig --> ServiceConfig: doExport()
+ServiceConfig --> ServiceConfig: doExportUrls() 遍历每一个协议
+ServiceConfig --> ServiceConfig: doExportUrlsFor1Protocol() 循环中基于特定的协议进行服务暴露
+ServiceConfig --> ServiceConfig: exportLocal() 暴露到本地
+ServiceConfig --> ServiceConfig: exportRemote() 暴露到远程
+ServiceConfig --> ServiceConfig: doExportUrl() 暴露服务以及对每一个注册中心进行参数设置，暂未注册
+ServiceConfig --> Protocol: spi.export() 层层包装
+Protocol --> InvokerCountWrapper: export() 继承的方法
+InvokerCountWrapper --> ProtocolSerializationWrapper: export() 继承的方法
+ProtocolSerializationWrapper --> ProtocolSecurityWrapper: export() 继承的方法
+ProtocolSecurityWrapper --> ProtocolListenerWrapper: export() 继承的方法
+ProtocolListenerWrapper --> QosProtocolWrapper: export() 继承的方法
+QosProtocolWrapper --> RegistryProtocol: export() 继承的方法
+RegistryProtocol --> RegistryProtocol: doLocalExport() 继承的方法
+RegistryProtocol --> ExporterFactory: createExporter()
+ExporterFactory --> RegistryProtocol: doLocalExport() 产生Exporter
+RegistryProtocol --> InvokerCountWrapper: protocol.export(invokerDelegate) 动态代理
+InvokerCountWrapper --> ProtocolSerializationWrapper: export() 继承的方法
+ProtocolSerializationWrapper --> ProtocolSecurityWrapper: export() 继承的方法
+ProtocolSecurityWrapper --> ProtocolListenerWrapper: export() 继承的方法
+ProtocolListenerWrapper --> QosProtocolWrapper: export() 继承的方法
+QosProtocolWrapper --> DubboProtocol: export() 继承的方法
+DubboProtocol --> DubboProtocol: openServer() 开启服务器进行监听。
 
 
 @enduml

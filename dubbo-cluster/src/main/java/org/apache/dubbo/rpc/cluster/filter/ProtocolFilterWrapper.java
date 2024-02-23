@@ -62,9 +62,11 @@ public class ProtocolFilterWrapper implements Protocol {
         logger.info(logger.getStackString("hgb,ProtocolFilterWrapper.export"));
 
         if (UrlUtils.isRegistry(invoker.getUrl())) {
+            // 1、先调用这里
             return protocol.export(invoker);
         }
         FilterChainBuilder builder = getFilterChainBuilder(invoker.getUrl());
+        // 2、后调用这里
         return protocol.export(builder.buildInvokerChain(invoker, SERVICE_FILTER_KEY, CommonConstants.PROVIDER));
     }
 

@@ -71,6 +71,7 @@ public class ProtocolListenerWrapper implements Protocol {
         logger.info(logger.getStackString("hgb,ProtocolListenerWrapper.export"));
 
         if (UrlUtils.isRegistry(invoker.getUrl())) {
+            // 1、先调用这里的protocol.export
             return protocol.export(invoker);
         }
         List<ExporterListener> exporterListeners = ScopeModelUtil.getExtensionLoader(ExporterListener.class, invoker.getUrl().getScopeModel())
@@ -79,6 +80,7 @@ public class ProtocolListenerWrapper implements Protocol {
             exporterListeners.add(invoker.getUrl().getOrDefaultFrameworkModel().getBeanFactory().getBean(InjvmExporterListener.class));
         }
         //protocol.export(invoker)注意这个
+        // 2、后调用这里的protocol.export
         return new ListenerExporterWrapper<T>(protocol.export(invoker),
                 Collections.unmodifiableList(exporterListeners));
     }
