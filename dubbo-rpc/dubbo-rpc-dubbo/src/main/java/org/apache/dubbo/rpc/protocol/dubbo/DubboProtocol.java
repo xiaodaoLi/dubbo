@@ -366,6 +366,7 @@ public class DubboProtocol extends AbstractProtocol {
                         //开启服务器，绑定端口
                         //至此，Provider就开始监听网络请求了，服务的暴露就完成了。
                         // 服务暴露之后，接下来是服务注册
+                        serverMap.put(key, createServer(url));
                         return;
                     }
                 }
