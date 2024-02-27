@@ -235,8 +235,22 @@ public class ConfigValidationUtils {
         return genCompatibleRegistries(interfaceConfig.getScopeModel(), registryList, provider);
     }
 
+    /**
+     *  Provider 侧，服务提供者在升级 Dubbo3 后会默认保持双注册行为，即同时注册接口级地址和应用级地址到注册中心，一方面保持兼容，另一方面为未来消费端迁移做好准备
+     *  Dubbo 会在 Zookeeper 的 /dubbo/interfaceName 和 /services/appName 下写入服务提供者的连接信息。
+     *  Provider侧，双注册的开关可通过 -Ddubbo.application.register-mode=all/interface/instance （接口级别、应用级别、应用和接口级别同时注册） 控制，
+     *   Dubbo推荐保持双注册的默认行为以减少后续迁移成本
+     *   Consumer侧，-Ddubbo.application.service-discovery.migration = FORCE_APPLICATION/FORCE_INTERFACE/APPLICATION_FIRST
+     * @param scopeModel
+     * @param registryList
+     * @param provider
+     * @return
+     */
     private static List<URL> genCompatibleRegistries(ScopeModel scopeModel, List<URL> registryList, boolean provider) {
         List<URL> result = new ArrayList<>(registryList.size());
+        // registry://10.144.170.221:2181/org.apache.dubbo.registry.RegistryService?
+        // application=first-dubbo-provider&dubbo=2.0.2&executor-management-mode=isolation&file-cache=true&pid=67600&qos.port=33333
+        // &registry=zookeeper&timeout=50000&timestamp=1708914656183
         registryList.forEach(registryURL -> {
             if (provider) {
                 // for registries enabled service discovery, automatically register interface compatible addresses.
@@ -260,12 +274,16 @@ public class ConfigValidationUtils {
                     if (!isValidRegisterMode(registerMode)) {
                         registerMode = DEFAULT_REGISTER_MODE_INTERFACE;
                     }
+                    // 双注册模式判断
                     if ((DEFAULT_REGISTER_MODE_INSTANCE.equalsIgnoreCase(registerMode) || DEFAULT_REGISTER_MODE_ALL.equalsIgnoreCase(registerMode))
                         && registryNotExists(registryURL, registryList, SERVICE_REGISTRY_PROTOCOL)) {
                         URL serviceDiscoveryRegistryURL = URLBuilder.from(registryURL)
                             .setProtocol(SERVICE_REGISTRY_PROTOCOL)
                             .removeParameter(REGISTRY_TYPE_KEY)
                             .build();
+                        // service-discovery-registry://10.144.170.221:2181/org.apache.dubbo.registry.RegistryService?
+                        // application=first-dubbo-provider&dubbo=2.0.2&executor-management-mode=isolation&file-cache=true&pid=71172&qos.port=33333
+                        // &registry=zookeeper&timeout=50000&timestamp=1708914818203
                         result.add(serviceDiscoveryRegistryURL);
                     }
 
