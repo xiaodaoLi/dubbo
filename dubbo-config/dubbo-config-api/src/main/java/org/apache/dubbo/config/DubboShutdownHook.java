@@ -142,6 +142,7 @@ public class DubboShutdownHook extends Thread {
      * Register the ShutdownHook
      */
     public void register() {
+        // 没有注册注销钩子，且不忽略注销钩子监听才设置注销钩子
         if (!ignoreListenShutdownHook && registered.compareAndSet(false, true)) {
             try {
                 Runtime.getRuntime().addShutdownHook(this);

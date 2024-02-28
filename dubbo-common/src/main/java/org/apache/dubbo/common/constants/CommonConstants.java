@@ -304,6 +304,9 @@ public interface CommonConstants {
      */
     String DUBBO_PREFERRED_NETWORK_INTERFACE = "dubbo.network.interface.preferred";
 
+    /**
+     * 服务优雅下线
+     */
     @Deprecated
     String SHUTDOWN_WAIT_SECONDS_KEY = "dubbo.service.shutdown.wait.seconds";
     String SHUTDOWN_WAIT_KEY = "dubbo.service.shutdown.wait";

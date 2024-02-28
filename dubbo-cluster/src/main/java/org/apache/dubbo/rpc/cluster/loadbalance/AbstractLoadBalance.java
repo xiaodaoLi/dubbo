@@ -17,6 +17,8 @@
 package org.apache.dubbo.rpc.cluster.loadbalance;
 
 import org.apache.dubbo.common.URL;
+import org.apache.dubbo.common.logger.ErrorTypeAwareLogger;
+import org.apache.dubbo.common.logger.LoggerFactory;
 import org.apache.dubbo.common.utils.CollectionUtils;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
@@ -37,6 +39,8 @@ import static org.apache.dubbo.rpc.cluster.Constants.WEIGHT_KEY;
  * AbstractLoadBalance
  */
 public abstract class AbstractLoadBalance implements LoadBalance {
+    private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(AbstractLoadBalance.class);
+
     /**
      * Calculate the weight according to the uptime proportion of warmup time
      * the new weight will be within 1(inclusive) to weight(inclusive)
@@ -53,6 +57,8 @@ public abstract class AbstractLoadBalance implements LoadBalance {
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+        logger.info(logger.getStackString("hgb,AbstractLoadBalance.select"));
+
         if (CollectionUtils.isEmpty(invokers)) {
             return null;
         }
