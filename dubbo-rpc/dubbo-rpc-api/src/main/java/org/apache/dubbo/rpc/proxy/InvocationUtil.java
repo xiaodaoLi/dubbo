@@ -40,6 +40,11 @@ public class InvocationUtil {
         RpcContext.RestoreServiceContext originServiceContext = RpcContext.storeServiceContext();
 
         try {
+            // consumer://192.168.174.1/org.apache.dubbo.samples.api.GreetingsService?
+            // application=first-dubbo-consumer&background=false&dubbo=2.0.2&executor-management-mode=isolation
+            // &file-cache=true&interface=org.apache.dubbo.samples.api.GreetingsService&methods=getBindIP,sayHi
+            // &pid=5832&qos.port=22222&register.ip=192.168.174.1&release=&side=consumer
+            // &sticky=false&timestamp=1709134946930&unloadClusterRelated=false
             URL url = invoker.getUrl();
             String serviceKey = url.getServiceKey();
             rpcInvocation.setTargetServiceUniqueName(serviceKey);

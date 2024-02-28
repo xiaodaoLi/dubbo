@@ -193,6 +193,8 @@ public interface FilterChainBuilder {
 
         @Override
         public Result invoke(Invocation invocation) throws RpcException {
+            LOGGER.info(LOGGER.getStackString("hgb,FilterChainBuilder.CallbackRegistrationInvoker.invoke" + "\n",
+                "filterInvoker instance of " + filterInvoker.getClass().getName()));
             Result asyncResult = filterInvoker.invoke(invocation);
             asyncResult.whenCompleteWithContext((r, t) -> {
                 RuntimeException filterRuntimeException = null;
