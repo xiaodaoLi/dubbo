@@ -30,6 +30,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
+ * 加权轮询负载均衡<br/>
+ * 带权重的轮询，假如一个invoker的权重为3，第二个的权重为5，那么轮询100次，这个invoker将被轮询60次，第二个将被轮询40次。<br/>
  * Round robin load balance.
  */
 public class RoundRobinLoadBalance extends AbstractLoadBalance {

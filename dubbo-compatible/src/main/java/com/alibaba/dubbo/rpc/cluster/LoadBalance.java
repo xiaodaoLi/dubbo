@@ -27,6 +27,9 @@ import com.alibaba.dubbo.common.DelegateURL;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * <a href= 'https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/loadbalance/'>负载均衡</a>
+ */
 @Deprecated
 public interface LoadBalance extends org.apache.dubbo.rpc.cluster.LoadBalance {
 

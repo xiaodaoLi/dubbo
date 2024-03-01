@@ -67,6 +67,7 @@ public class ProtocolFilterWrapper implements Protocol {
         }
         FilterChainBuilder builder = getFilterChainBuilder(invoker.getUrl());
         // 2、后调用这里
+        // FilterChainBuilder.buildInvokerChain 构造服务端的调用链
         return protocol.export(builder.buildInvokerChain(invoker, SERVICE_FILTER_KEY, CommonConstants.PROVIDER));
     }
 
@@ -80,6 +81,7 @@ public class ProtocolFilterWrapper implements Protocol {
             return protocol.refer(type, url);
         }
         FilterChainBuilder builder = getFilterChainBuilder(url);
+        // 客户端的调用链
         return builder.buildInvokerChain(protocol.refer(type, url), REFERENCE_FILTER_KEY, CommonConstants.CONSUMER);
     }
 

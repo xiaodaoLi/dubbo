@@ -28,6 +28,12 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * LeastActiveLoadBalance
  * <p>
+ *     加权最小活跃调用。provider收到一个请求时，将活跃数量+1，调用结束时将活跃数量-1.<br/>
+ *     活跃数量表示的含义是当前正在处理的请求数量，表示的是provider的繁忙程度。活跃数量越少说明该provider越空闲。<br/>
+ *     活跃数量一致时，则根据权重进行选择。权重还一致的话就在这几个活跃数一致、权重一致的providers里面随机选一个
+ * <p/>
+ *
+ * <p>
  * Filter the number of invokers with the least number of active calls and count the weights and quantities of these invokers.
  * If there is only one invoker, use the invoker directly;
  * if there are multiple invokers and the weights are not the same, then random according to the total weight;

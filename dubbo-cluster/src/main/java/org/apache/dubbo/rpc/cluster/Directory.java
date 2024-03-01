@@ -29,6 +29,7 @@ import java.util.List;
  * Directory. (SPI, Prototype, ThreadSafe)
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Directory_service">Directory Service</a>
+ * <a href="https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/directory/">Dubbo 官网对于服务目录的解释</a>
  *
  * @see org.apache.dubbo.rpc.cluster.Cluster#join(Directory)
  */

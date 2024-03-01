@@ -42,6 +42,9 @@ public abstract class AbstractLoadBalance implements LoadBalance {
     private static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(AbstractLoadBalance.class);
 
     /**
+     * 根据启动时间按比例提升权重<br/>
+     * eg.预热时间为10分钟，默认总权值为100，启动时间为1分钟，权重为10，承担最终流量的10% <br/>
+     *    预热时间为10分钟，默认总权值为100，启动时间为2分钟，权重为20，承担最终流量的20%。。。 以此类推<br/>
      * Calculate the weight according to the uptime proportion of warmup time
      * the new weight will be within 1(inclusive) to weight(inclusive)
      *
@@ -90,15 +93,21 @@ public abstract class AbstractLoadBalance implements LoadBalance {
         if (REGISTRY_SERVICE_REFERENCE_PATH.equals(url.getServiceInterface())) {
             weight = url.getParameter(WEIGHT_KEY, DEFAULT_WEIGHT);
         } else {
+            //从url中获取provider权重配置值，默认为100
             weight = url.getMethodParameter(RpcUtils.getMethodName(invocation), WEIGHT_KEY, DEFAULT_WEIGHT);
             if (weight > 0) {
+                //provider的启动时间戳
                 long timestamp = invoker.getUrl().getParameter(TIMESTAMP_KEY, 0L);
                 if (timestamp > 0L) {
+                    // 到目前为止该provider运行了多长时间
                     long uptime = System.currentTimeMillis() - timestamp;
                     if (uptime < 0) {
+                        //权重范围是[1,weight），1 是最小值
                         return 1;
                     }
+                    //获取配置的预热时长，默认是十分钟
                     int warmup = invoker.getUrl().getParameter(WARMUP_KEY, DEFAULT_WARMUP);
+                    // 如果provider的启动时间戳大于0，且运行时间小于预热时间，则权重减少（降权），权重范围是[1,weight）
                     if (uptime > 0 && uptime < warmup) {
                         weight = calculateWarmupWeight((int)uptime, warmup, weight);
                     }

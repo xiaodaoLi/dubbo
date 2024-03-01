@@ -94,6 +94,11 @@ public interface Constants {
 
     String WARMUP_KEY = "warmup";
 
+    /**
+     * The default value of warmup<br/>
+     * 默认的预热时间，10分钟
+     * @see #WARMUP_KEY
+     */
     int DEFAULT_WARMUP = 10 * 60 * 1000;
 
     String CONFIG_VERSION_KEY = "configVersion";

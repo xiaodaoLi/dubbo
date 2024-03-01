@@ -32,6 +32,10 @@ import static org.apache.dubbo.common.constants.RegistryConstants.REGISTRY_SERVI
 import static org.apache.dubbo.rpc.cluster.Constants.WEIGHT_KEY;
 
 /**
+ * <b>基于权重随机算法的随机负载均衡<b/><br/>
+ * 默认策略
+ * 基于随机数的随机选择，也可以是带权重的随机选择<br/>
+ *
  * This class select one provider from multiple providers randomly.
  * You can define weights for each provider:
  * If the weights are all the same then it will use random.nextInt(number of invokers).

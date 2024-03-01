@@ -189,6 +189,7 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
         if (CollectionUtils.isEmpty(invokers)) {
             return null;
         }
+        // provider的数量只有一个的时候直接调用，超过一个则进行负载均衡，选择某一个provider
         if (invokers.size() == 1) {
             Invoker<T> tInvoker = invokers.get(0);
             checkShouldInvalidateInvoker(tInvoker);
@@ -196,6 +197,7 @@ public abstract class AbstractClusterInvoker<T> implements ClusterInvoker<T> {
         }
         Invoker<T> invoker = loadbalance.select(invokers, getUrl(), invocation);
 
+        // 重新选择provider
         //If the `invoker` is in the  `selected` or invoker is unavailable && availablecheck is true, reselect.
         boolean isSelected = selected != null && selected.contains(invoker);
         boolean isUnavailable = availableCheck && !invoker.isAvailable() && getUrl() != null;
