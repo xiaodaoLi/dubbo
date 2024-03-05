@@ -82,6 +82,8 @@ public class MetadataReportInstance implements Disposable {
     }
 
     private void init(MetadataReportConfig config, MetadataReportFactory metadataReportFactory) {
+        //metadata://10.144.170.221:2181?block-until-connected-wait=50
+        // &blockUntilConnectedWait=50&client=&metadata=zookeeper&port=2181&protocol=zookeeper&timeout=50000
         URL url = config.toUrl();
         if (METADATA_REPORT_KEY.equals(url.getProtocol())) {
             String protocol = url.getParameter(METADATA_REPORT_KEY, DEFAULT_DIRECTORY);

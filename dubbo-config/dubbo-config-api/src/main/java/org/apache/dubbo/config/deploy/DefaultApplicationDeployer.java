@@ -309,6 +309,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
 
     private void startMetadataCenter() {
 
+        // 如果没有配置元数据中心则使用注册中心当中元数据中心
         useRegistryAsMetadataCenterIfNecessary();
 
         ApplicationConfig applicationConfig = getApplication();
@@ -486,10 +487,13 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
 
         MetadataReportConfig metadataConfigToOverride = metadataConfigsToOverride.stream().findFirst().orElse(null);
 
+        //<dubbo:registry timeout="50000" port="2181" parameters="{blockUntilConnectedWait=50, block-until-connected-wait=50}"
+        // address="zookeeper://10.144.170.221:2181" protocol="zookeeper" />
         List<RegistryConfig> defaultRegistries = configManager.getDefaultRegistries();
         if (!defaultRegistries.isEmpty()) {
             defaultRegistries
                 .stream()
+                // 是否使用注册中心当做元数据中心
                 .filter(this::isUsedRegistryAsMetadataCenter)
                 .map(registryConfig -> registryAsMetadataCenter(registryConfig, metadataConfigToOverride))
                 .forEach(metadataReportConfig -> {
@@ -730,8 +734,10 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
     }
 
     private void startModules() {
-        //内部服务有个元数据服务，Dubbo3中每个服务都可以对外提供服务的元数据信息，来简化服务配置。
-        // 不论是内部服务还是外部服务调用的代码逻辑都是模块发布器ModuleDeployer的start()方法
+        /**
+         * 内部服务有个元数据服务，Dubbo3中每个服务都可以对外提供服务的元数据信息，来简化服务配置。
+         * 无论是内部服务还是外部服务调用的代码逻辑都是模块发布器 ModuleDeployer的start() 方法
+         */
 
         // ensure init and start internal module first
         //确保初始化并首先启动内部模块,Dubbo3中将模块分为内部和外部
@@ -739,6 +745,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
         prepareInternalModule();
 
         //启动所有的模块 （启动所有的服务）
+        // 这里会有多个模块Module，每个模块内的服务都是不一样的。（dubbo内部模块，以及外部模块（业务侧代码））
         // filter and start pending modules, ignore new module during starting, throw exception of module start
         for (ModuleModel moduleModel : applicationModel.getModuleModels()) {
             if (moduleModel.getDeployer().isPending()) {
@@ -955,6 +962,7 @@ public class DefaultApplicationDeployer extends AbstractDeployer<ApplicationMode
 
     @Override
     public void refreshServiceInstance() {
+        // 注册到注册中心之后再书信服务
         if (registered) {
             try {
                 ServiceInstanceMetadataUtils.refreshMetadataAndInstance(applicationModel);

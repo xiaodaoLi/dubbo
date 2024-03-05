@@ -210,7 +210,9 @@ public class ExtensionLoader<T> {
     }
 
     ExtensionLoader(Class<?> type, ExtensionDirector extensionDirector, ScopeModel scopeModel) {
+        // 指定扩展机制对哪个接口使用
         this.type = type;
+
         this.extensionDirector = extensionDirector;
         this.extensionPostProcessors = extensionDirector.getExtensionPostProcessors();
         initInstantiationStrategy();
@@ -674,6 +676,7 @@ public class ExtensionLoader<T> {
             cachedClasses.get().put(name, clazz);
         } else {
             if (cachedAdaptiveClass != null) {
+                // 一个接口只有有一个实现类标注注解@Adaptive
                 throw new IllegalStateException(
                     "Adaptive Extension already exists (Extension " + type + ")!");
             }
@@ -1027,6 +1030,8 @@ public class ExtensionLoader<T> {
         }
 
         String value = defaultAnnotation.value();
+        logger.info("hgb,API annotation of type "+ type +" is " + value);
+
         if ((value = value.trim()).length() > 0) {
             String[] names = NAME_SEPARATOR.split(value);
             if (names.length > 1) {
@@ -1418,6 +1423,7 @@ public class ExtensionLoader<T> {
         } catch (Throwable ignore) {
 
         }
+        logger.info("hgb,generate code for " + type + " cachedDefaultName is " + cachedDefaultName);
         String code = new AdaptiveClassCodeGenerator(type, cachedDefaultName).generate();
         org.apache.dubbo.common.compiler.Compiler compiler = extensionDirector.getExtensionLoader(
             org.apache.dubbo.common.compiler.Compiler.class).getAdaptiveExtension();

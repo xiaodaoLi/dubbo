@@ -56,6 +56,12 @@ import static org.apache.dubbo.registry.client.metadata.ServiceInstanceMetadataU
 public class MetadataUtils {
     public static final ErrorTypeAwareLogger logger = LoggerFactory.getErrorTypeAwareLogger(MetadataUtils.class);
 
+    /**
+     * 元数据上报，发布服务定义
+     * @param url
+     * @param serviceDescriptor
+     * @param applicationModel
+     */
     public static void publishServiceDefinition(URL url, ServiceDescriptor serviceDescriptor, ApplicationModel applicationModel) {
         if (getMetadataReports(applicationModel).size() == 0) {
             String msg = "Remote Metadata Report Server is not provided or unavailable, will stop registering service definition to remote center!";
@@ -77,6 +83,7 @@ public class MetadataUtils {
                             logger.info("Report of service definition is disabled for " + entry.getKey());
                             continue;
                         }
+                        // 元数据上报
                         metadataReport.storeProviderMetadata(
                             new MetadataIdentifier(
                                 url.getServiceInterface(),

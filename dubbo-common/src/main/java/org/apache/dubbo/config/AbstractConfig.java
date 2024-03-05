@@ -681,6 +681,7 @@ public abstract class AbstractConfig implements Serializable {
     }
 
     /**
+     * 服务实例的初始化
      * Dubbo config property override
      */
     public void refresh() {

@@ -270,6 +270,7 @@ public abstract class AbstractMetadataReport implements MetadataReport {
 
     @Override
     public void storeProviderMetadata(MetadataIdentifier providerMetadataIdentifier, ServiceDefinition serviceDefinition) {
+        logger.info(logger.getStackString("hgb,AbstractMetadataReport.storeProviderMetadata"));
         if (syncReport) {
             storeProviderMetadataTask(providerMetadataIdentifier, serviceDefinition);
         } else {
@@ -280,6 +281,7 @@ public abstract class AbstractMetadataReport implements MetadataReport {
     private void storeProviderMetadataTask(MetadataIdentifier providerMetadataIdentifier, ServiceDefinition serviceDefinition) {
 
         MetadataEvent metadataEvent = MetadataEvent.toServiceSubscribeEvent(applicationModel, providerMetadataIdentifier.getUniqueServiceName());
+        // 元数据上报
         MetricsEventBus.post(metadataEvent, () ->
             {
                 boolean result = true;
@@ -290,6 +292,7 @@ public abstract class AbstractMetadataReport implements MetadataReport {
                     allMetadataReports.put(providerMetadataIdentifier, serviceDefinition);
                     failedReports.remove(providerMetadataIdentifier);
                     String data = JsonUtils.toJson(serviceDefinition);
+                    // 执行子类中的实例化方法进行元数据上报
                     doStoreProviderMetadata(providerMetadataIdentifier, data);
                     saveProperties(providerMetadataIdentifier, data, true, !syncReport);
                 } catch (Exception e) {
@@ -524,8 +527,18 @@ public abstract class AbstractMetadataReport implements MetadataReport {
         doSaveSubscriberData(subscriberMetadataIdentifier, encodedUrlList);
     }
 
+    /**
+     * provider 元数据上报
+     * @param providerMetadataIdentifier
+     * @param serviceDefinitions
+     */
     protected abstract void doStoreProviderMetadata(MetadataIdentifier providerMetadataIdentifier, String serviceDefinitions);
 
+    /**
+     * consumer元数据上报
+     * @param consumerMetadataIdentifier
+     * @param serviceParameterString
+     */
     protected abstract void doStoreConsumerMetadata(MetadataIdentifier consumerMetadataIdentifier, String serviceParameterString);
 
     protected abstract void doSaveMetadata(ServiceMetadataIdentifier metadataIdentifier, URL url);

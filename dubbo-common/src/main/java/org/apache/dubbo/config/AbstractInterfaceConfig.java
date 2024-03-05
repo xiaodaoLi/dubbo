@@ -330,6 +330,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                 return;
             }
 
+            //获取服务的方法，组装成方法的配置和参数的配置
             for (Method method : methods) {
                 if (ConfigurationUtils.hasSubProperties(configProperties, method.getName())) {
                     MethodConfig methodConfig = getMethodByName(method.getName());
@@ -341,11 +342,13 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                     }
                     // Add argument config
                     // dubbo.service.{interfaceName}.{methodName}.{arg-index}.xxx=xxx
+                    // 通过反射获取方法上面的参数信息，并组装成参数配置ArgumentConfig
                     java.lang.reflect.Parameter[] arguments = method.getParameters();
                     for (int i = 0; i < arguments.length; i++) {
                         if (getArgumentByIndex(methodConfig, i) == null &&
                             hasArgumentConfigProps(configProperties, methodConfig.getName(), i)) {
 
+                            // 每个服务的每个方法中又有参数相关的配置
                             ArgumentConfig argumentConfig = new ArgumentConfig();
                             argumentConfig.setIndex(i);
                             methodConfig.addArgument(argumentConfig);
@@ -366,6 +369,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                 List<MethodConfig> validMethodConfigs = methodConfigs.stream().filter(methodConfig -> {
                     methodConfig.setParentPrefix(preferredPrefix);
                     methodConfig.setScopeModel(getScopeModel());
+                    // 刷新方法配置
                     methodConfig.refresh();
                     // verify method config
                     return verifyMethodConfig(methodConfig, finalInterfaceClass, ignoreInvalidMethodConfig);

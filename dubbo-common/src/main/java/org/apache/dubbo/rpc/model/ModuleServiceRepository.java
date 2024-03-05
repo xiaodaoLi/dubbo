@@ -32,7 +32,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
- * Service repository for module
+ * Service repository for module<br/>
+ *
+ * ServiceRepository保存了当前应用提供了哪些服务、引用了哪些服务。<br/>
+ * 后续Consumer服务引用时，如果自身已经提供了该服务，就会通过ServiceRepository直接引用本地提供的服务，跳过网络传输<br/>
+ *
  */
 public class ModuleServiceRepository {
 

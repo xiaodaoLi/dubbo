@@ -175,6 +175,7 @@ public abstract class AbstractZookeeperClient<TargetDataListener, TargetChildLis
 
     @Override
     public void createOrUpdate(String path, String content, boolean ephemeral) {
+        logger.info(logger.getStackString("AbstractZookeeperClient.createOrUpdate", "parth is " + path, "content is " + content));
         int i = path.lastIndexOf('/');
         if (i > 0) {
             create(path.substring(0, i), false, true);

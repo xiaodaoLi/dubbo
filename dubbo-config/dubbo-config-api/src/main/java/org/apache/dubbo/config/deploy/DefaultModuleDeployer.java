@@ -145,6 +145,8 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
         logger.info(logger.getStackString("hgb,DefaultModuleDeployer.start"));
 
         // initialize，maybe deadlock applicationDeployer lock & moduleDeployer lock
+        // 由于可能存在的死锁或者锁等待问题导致前面在进行“应用发布器”初始化时没有执行到初始化动作，这里需要再出发一次初始化动作。
+        // 初始化方法会根据初始化表示判断是否已经初始化过了，如果已经初始化了就跳过初始化。
         applicationDeployer.initialize();
 
         return startSync();
@@ -171,6 +173,7 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
 
             // prepare application instance
             // exclude internal module to avoid wait itself
+            // 判断当前实例变量 moduleModel 是否是内部模块
             if (moduleModel != moduleModel.getApplicationModel().getInternalModule()) {
                 applicationDeployer.prepareInternalModule();
             }
@@ -436,7 +439,9 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                 try {
                     if (!sc.isExported()) {
+
                         sc.export();
+
                         exportedServices.add(sc);
                     }
                 } catch (Throwable t) {
@@ -447,7 +452,9 @@ public class DefaultModuleDeployer extends AbstractDeployer<ModuleModel> impleme
             asyncExportingFutures.add(future);
         } else {
             if (!sc.isExported()) {
+
                 sc.export(RegisterTypeEnum.AUTO_REGISTER_BY_DEPLOYER);
+
                 exportedServices.add(sc);
             }
         }

@@ -89,6 +89,7 @@ public class AdaptiveClassCodeGenerator {
     }
 
     /**
+     * 生成<code>@Adaptive<code/>注解标注的类的代理类
      * generate and return class code
      */
     public String generate() {

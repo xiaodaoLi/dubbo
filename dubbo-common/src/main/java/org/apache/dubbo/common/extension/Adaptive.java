@@ -25,7 +25,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Provide helpful information for {@link ExtensionLoader} to inject dependency extension instance.
+ * SPI扩展机制<br/>
+ * Provide helpful information for {@link ExtensionLoader} to inject dependency extension instance.<br/>
+ * 根据{@link URL}自适应的选择标注了该注解的接口或者方法的实现类。
+ * <p>
+ *     如果是标注在类上，只有一个实现类能够标注注解<code>@Adaptive</code>
+ *     如果是标注在方法中，则根据URL中参数和指定的Key进行逐个比对，返回第一个匹配的实现类。如果没有找到则抛出异常
+ *     标注了注解<code>@Adaptive</code>的实现类会生成一个叫做XXX$Adaptive的代理类
+ * <p/>
  *
  * @see ExtensionLoader
  * @see URL

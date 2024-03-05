@@ -284,9 +284,13 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
             this.serviceListeners.addAll(extensionLoader.getSupportedExtensionInstances());
         }
         initServiceMetadata(provider);
-        serviceMetadata.setServiceType(getInterfaceClass());
-        serviceMetadata.setTarget(getRef());
+        // 每一个服务都对应一个ServiceConfig，在ServiceConfig中设置接口与实现类的对应关系
+        Class<?> interfaceClass = getInterfaceClass();
+        serviceMetadata.setServiceType(interfaceClass);
+        T interfaceImplement = getRef();
+        serviceMetadata.setTarget(interfaceImplement);
         serviceMetadata.generateServiceKey();
+        logger.info("hgb,init ServiceConfig. The implement of service " + interfaceClass.getName() + " is " + interfaceImplement.getClass().getName());
     }
 
     @Override
@@ -319,6 +323,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                 this.refresh();
             }
             if (this.shouldExport()) {
+                // 服务实例的初始化。设置服务与实现类的对应关系
                 this.init();
 
                 if (shouldDelay()) {
@@ -529,7 +534,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         ModuleServiceRepository repository = getScopeModel().getServiceRepository();
         ServiceDescriptor serviceDescriptor;
         final boolean serverService = ref instanceof ServerService;
-        if (serverService) {
+         if (serverService) {
             serviceDescriptor = ((ServerService) ref).getServiceDescriptor();
             repository.registerService(serviceDescriptor);
         } else {
@@ -789,13 +794,15 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
     /**
      * export服务到本地
-     * 如果scope没有配置或者配置local、remote，dubbo会将服务export到本地，意思就是：将服务以injvm协议export出去，如果是同一个jvm的应用可以直接通过jvm发起调用，而不需要通过网络发起远程调用。
+     * 如果scope没有配置或者配置local、remote，dubbo会将服务export到本地，
+     * 意思就是：将服务以injvm协议export出去，如果是同一个jvm的应用可以直接通过jvm发起调用，而不需要通过网络发起远程调用。
      *
      * export到本地主要做了以下几件事：
      *
      * 将url的协议配置为jvm，host:port配置为127.0.0.1:0
      * 构造filter链，虽然是本地export，但是会经过定义好的filter
      * 构造InjvmExporter
+     *
      * @param url
      * @param registryURLs
      * @param registerType
@@ -827,7 +834,9 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
                         build();
                 }
 
+                // 暴露服务到远端。（监听网络端口）
                 url = exportRemote(url, registryURLs, registerType);
+                // 服务暴露之后进行元数据上报。
                 if (!isGeneric(generic) && !getScopeModel().isInternal()) {
                     MetadataUtils.publishServiceDefinition(url, providerModel.getServiceModel(), getApplicationModel());
                 }

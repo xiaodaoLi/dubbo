@@ -20,6 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * 包装、装饰实现类，将一些通用的逻辑放在装饰类中，最终还是要调用实际的实现类
  * The annotated class will only work as a wrapper when the condition matches.
  */
 @Retention(RetentionPolicy.RUNTIME)
