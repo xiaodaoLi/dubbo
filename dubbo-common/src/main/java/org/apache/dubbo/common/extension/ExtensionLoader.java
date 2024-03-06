@@ -1089,6 +1089,7 @@ public class ExtensionLoader<T> {
                 }
             }
 
+            // 根据fileName（META-INF/dubbo/internal/org.apache.dubbo.common.extension.ExtensionInjector） 获取所有的实现类的全限定名称或者路径
             Map<ClassLoader, Set<java.net.URL>> resources = ClassLoaderResourceLoader.loadResources(
                 fileName, classLoadersToLoad);
             resources.forEach(((classLoader, urls) -> {
@@ -1139,6 +1140,7 @@ public class ExtensionLoader<T> {
                         includedPackages) && !isExcludedByClassLoader(clazz, classLoader,
                         onlyExtensionClassLoaderPackages)) {
 
+                        // Class.forName 仅加载类，不初始化
                         loadClass(classLoader, extensionClasses, resourceURL,
                             Class.forName(clazz, true, classLoader), name, overridden);
                     }
@@ -1339,11 +1341,13 @@ public class ExtensionLoader<T> {
 
     /**
      * cache Adaptive class which is annotated with <code>Adaptive</code>
+     * 缓存标注了@Adapyive注解的实现类，并判断是否仅有一个实现类标注了该注解
      */
     private void cacheAdaptiveClass(Class<?> clazz, boolean overridden) {
         if (cachedAdaptiveClass == null || overridden) {
             cachedAdaptiveClass = clazz;
         } else if (!cachedAdaptiveClass.equals(clazz)) {
+            // 标注了@Adaptive的接口实现类只能有一个
             throw new IllegalStateException(
                 "More than 1 adaptive class found: " + cachedAdaptiveClass.getName() + ", " + clazz.getName());
         }
@@ -1363,6 +1367,7 @@ public class ExtensionLoader<T> {
 
     /**
      * test if clazz is a wrapper class
+     * 根据是否存在仅有type类型的参数的构造方法来确定
      * <p>
      * which has Constructor with given class type as its only argument
      */
