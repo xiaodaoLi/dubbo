@@ -20,6 +20,9 @@ import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.cluster.Directory;
 import org.apache.dubbo.rpc.cluster.support.wrapper.AbstractCluster;
 
+/**
+ * {@link MergeableClusterInvoker}
+ */
 public class MergeableCluster extends AbstractCluster {
 
     public static final String NAME = "mergeable";

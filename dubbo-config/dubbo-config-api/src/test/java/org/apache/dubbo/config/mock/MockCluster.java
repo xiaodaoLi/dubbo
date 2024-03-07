@@ -21,6 +21,9 @@ import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.cluster.Cluster;
 import org.apache.dubbo.rpc.cluster.Directory;
 
+/**
+ * 服务无可用时伪造响应结果，或者直接强制返回伪造结果，而不发起调用。
+ */
 public class MockCluster implements Cluster {
     @Override
     public <T> Invoker<T> join(Directory<T> directory, boolean buildFilterChain) throws RpcException {

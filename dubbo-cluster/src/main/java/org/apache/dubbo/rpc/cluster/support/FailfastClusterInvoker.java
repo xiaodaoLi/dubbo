@@ -29,6 +29,7 @@ import org.apache.dubbo.rpc.support.RpcUtils;
 import java.util.List;
 
 /**
+ * <b>快速失败，不进行重试，用于非幂等操作<b/><br/>
  * Execute exactly once, which means this policy will throw an exception immediately in case of an invocation error.
  * Usually used for non-idempotent write operations
  *
@@ -49,6 +50,7 @@ public class FailfastClusterInvoker<T> extends AbstractClusterInvoker<T> {
             if (e instanceof RpcException && ((RpcException) e).isBiz()) { // biz exception.
                 throw (RpcException) e;
             }
+            // 调用失败后抛出异常，不进行重试
             throw new RpcException(e instanceof RpcException ? ((RpcException) e).getCode() : 0,
                 "Failfast invoke providers " + invoker.getUrl() + " " + loadbalance.getClass().getSimpleName()
                     + " for service " + getInterface().getName()

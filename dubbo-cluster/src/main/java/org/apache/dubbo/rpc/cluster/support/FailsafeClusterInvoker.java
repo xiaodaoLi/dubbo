@@ -31,6 +31,7 @@ import java.util.List;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_ERROR_RESPONSE;
 
 /**
+ * <b>失败后返回空结果，忽略异常，不影响上层调用。用于佛系操作，即使失败也无所谓<b/>
  * When invoke fails, log the error message and ignore this error by returning an empty Result.
  * Usually used to write audit logs and other operations
  *
@@ -50,6 +51,7 @@ public class FailsafeClusterInvoker<T> extends AbstractClusterInvoker<T> {
             Invoker<T> invoker = select(loadbalance, invocation, invokers, null);
             return invokeWithContext(invoker, invocation);
         } catch (Throwable e) {
+            // 忽略异常，返回空结果
             logger.error(CLUSTER_ERROR_RESPONSE,"Failsafe for provider exception","","Failsafe ignore exception: " + e.getMessage(),e);
             return AsyncRpcResult.newDefaultAsyncResult(null, null, invocation); // ignore
         }

@@ -554,6 +554,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
 
         // 查看需要注册到哪些注册中心，2.7版本之后支持同时往多个注册中心中进行注册
         //由于dubbo支持多个协议，所以dubbo针对每一种协议都会在每一个注册中心注册一遍(2.7之后的版本支持多注册中心)
+        // todo 配置多个注册中心验证一下是否每个注册中心都会进行注册
         List<URL> registryURLs = ConfigValidationUtils.loadRegistries(this, true);
 
         for (ProtocolConfig protocolConfig : protocols) {
@@ -927,6 +928,8 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         }
 
         // 动态代理，不同的协议创建不同的invoker
+        // 基于动态代理将URL、Service、ServiceImpl封装成Invoker（Service接口的动态代理）,后续在URL被请求时可以回调对应的实现类ServiceImpl
+        //StubProxyFactoryWrapper -> JavassistProxyFactory
         Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, url);
         if (withMetaData) {
             invoker = new DelegateProviderMetaDataInvoker(invoker, this);

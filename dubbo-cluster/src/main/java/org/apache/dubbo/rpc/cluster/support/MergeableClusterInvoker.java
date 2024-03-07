@@ -46,6 +46,7 @@ import static org.apache.dubbo.rpc.Constants.ASYNC_KEY;
 import static org.apache.dubbo.rpc.Constants.MERGER_KEY;
 
 /**
+ * 将多个节点的结果进行合并
  * @param <T>
  */
 @SuppressWarnings("unchecked")

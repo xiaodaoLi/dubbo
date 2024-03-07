@@ -45,6 +45,7 @@ import static org.apache.dubbo.rpc.cluster.Constants.DEFAULT_FORKS;
 /**
  * NOTICE! This implementation does not work well with async call.
  * <p>
+ *     并发调用多个实例，只要有一个实例返回就立刻向上返回结果。适用于对于实时性要求极高的场景
  * Invoke a specific number of invokers concurrently, usually used for demanding real-time operations, but need to waste more service resources.
  *
  * <a href="http://en.wikipedia.org/wiki/Fork_(topology)">Fork</a>

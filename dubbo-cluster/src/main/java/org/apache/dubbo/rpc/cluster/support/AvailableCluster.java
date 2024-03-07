@@ -22,6 +22,7 @@ import org.apache.dubbo.rpc.cluster.support.wrapper.AbstractCluster;
 
 /**
  * AvailableCluster
+ * {@link AvailableClusterInvoker}
  *
  */
 public class AvailableCluster extends AbstractCluster {

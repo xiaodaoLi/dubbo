@@ -46,6 +46,7 @@ import static org.apache.dubbo.rpc.cluster.Constants.DEFAULT_FAILBACK_TASKS;
 import static org.apache.dubbo.rpc.cluster.Constants.FAIL_BACK_TASKS_KEY;
 
 /**
+ * <b>失败后记录请求，由线程池进行定时重试。适用于异步操作或者最终一致性请求<b/>
  * When fails, record failure requests and schedule for retry on a regular interval.
  * Especially useful for services of notification.
  *
@@ -115,8 +116,10 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
                     ", wait for retry in background. Ignored exception: "
                 + e.getMessage() + ", ",e);
             if (retries > 0) {
+                // 忽略异常并进行异步重试
                 addFailed(loadbalance, invocation, invokers, invoker, consumerUrl);
             }
+            //异步返回
             return AsyncRpcResult.newDefaultAsyncResult(null, null, invocation); // ignore
         }
     }

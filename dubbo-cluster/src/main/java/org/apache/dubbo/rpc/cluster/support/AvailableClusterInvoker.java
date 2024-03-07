@@ -27,6 +27,7 @@ import java.util.List;
 
 /**
  * AvailableClusterInvoker
+ * 遍历所有实例，找到第一个可用的节点进行调用。不进行负载均衡
  *
  */
 public class AvailableClusterInvoker<T> extends AbstractClusterInvoker<T> {

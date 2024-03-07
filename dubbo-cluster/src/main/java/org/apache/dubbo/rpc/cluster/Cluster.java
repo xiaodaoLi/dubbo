@@ -25,10 +25,12 @@ import org.apache.dubbo.rpc.model.ScopeModel;
 import org.apache.dubbo.rpc.model.ScopeModelUtil;
 
 /**
+ * <b>集群，每一个Cluster的实现类都会new一个对应的Invoker<b/>
  * Cluster. (SPI, Singleton, ThreadSafe)
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Computer_cluster">Cluster</a>
  * <a href="http://en.wikipedia.org/wiki/Fault-tolerant_system">Fault-Tolerant</a>
+ * @see Invoker
  *
  */
 @SPI(Cluster.DEFAULT)

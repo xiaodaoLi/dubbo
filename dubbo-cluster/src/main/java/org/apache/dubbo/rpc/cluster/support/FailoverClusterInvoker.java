@@ -39,6 +39,8 @@ import static org.apache.dubbo.common.constants.CommonConstants.RETRIES_KEY;
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_FAILED_MULTIPLE_RETRIES;
 
 /**
+ * 故障转移，当某台机器调用失败时，记录错误并重试其他调用者（最多n次，即最多n个不同的调用者将被调用）<br/>
+ * 通常用于读操作或幂等操作中<br/>
  * When invoke fails, log the initial error and retry other invokers (retry n times, which means at most n different invokers will be invoked)
  * Note that retry causes latency.
  * <p>
@@ -77,6 +79,7 @@ public class FailoverClusterInvoker<T> extends AbstractClusterInvoker<T> {
             RpcContext.getServiceContext().setInvokers((List) invoked);
             boolean success = false;
             try {
+                // 在for循环中调用，失败后不影响循环，继续尝试调用其他机器
                 Result result = invokeWithContext(invoker, invocation);
                 if (le != null && logger.isWarnEnabled()) {
                     logger.warn(CLUSTER_FAILED_MULTIPLE_RETRIES,"failed to retry do invoke","","Although retry the method " + methodName

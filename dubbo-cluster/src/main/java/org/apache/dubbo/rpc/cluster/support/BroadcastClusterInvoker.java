@@ -36,6 +36,7 @@ import static org.apache.dubbo.common.constants.LoggerCodeConstants.CLUSTER_ERRO
 
 /**
  * BroadcastClusterInvoker
+ *  广播所有可用的服务，只要有一个报错就向上抛出异常
  */
 public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
@@ -116,6 +117,7 @@ public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
                         failThresholdIndex, failIndex));
                 }
             }
+            // 广播所有可用的服务，只要有一个报错就向上抛出异常
             throw exception;
         }
 
