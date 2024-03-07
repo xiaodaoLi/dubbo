@@ -38,6 +38,18 @@ import java.util.concurrent.locks.Lock;
 
 import static org.apache.dubbo.common.constants.LoggerCodeConstants.CONFIG_UNABLE_DESTROY_MODEL;
 
+/**
+ * 由于大企业有在同一个JVM中运行多个Dubbo应用的需求，
+ * 使用 ScopeModel进行不同应用间的作用域管理。
+ * 使用 {@link ExtensionAccessor} 进行统一的访问管理
+ *        不同Model的序列生成如下：
+ *         FrameworkModel    1
+ *         ApplicationModel  1.1
+ *         ModuleModel       1.1.1
+ * @see ExtensionScope
+ * @see org.apache.dubbo.common.extension.ExtensionAccessor
+ * <a href = 'https://blog.csdn.net/wufagang/article/details/130786109'> Dubbo  ScopeModel 详解<a/>
+ */
 public abstract class ScopeModel implements ExtensionAccessor {
     protected static final ErrorTypeAwareLogger LOGGER = LoggerFactory.getErrorTypeAwareLogger(ScopeModel.class);
 

@@ -69,9 +69,11 @@ public class ExtensionDirector implements ExtensionAccessor {
         if (type == null) {
             throw new IllegalArgumentException("Extension type == null");
         }
+        // 只能ExtentionLoader只能用来加载接口的实现，对于不是接口的类抛出异常
         if (!type.isInterface()) {
             throw new IllegalArgumentException("Extension type (" + type + ") is not an interface!");
         }
+        // 加载的扩展类如果没有使用@SPI注解，抛出异常
         if (!withExtensionAnnotation(type)) {
             throw new IllegalArgumentException("Extension type (" + type +
                 ") is not an extension, because it is NOT annotated with @" + SPI.class.getSimpleName() + "!");

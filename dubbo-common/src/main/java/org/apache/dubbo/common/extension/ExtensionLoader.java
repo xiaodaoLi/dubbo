@@ -113,6 +113,10 @@ public class ExtensionLoader<T> {
 
     private final ConcurrentMap<Class<?>, Object> extensionInstances = new ConcurrentHashMap<>(64);
 
+    /**
+     * 需要加载的扩展类的接口。
+     * 在实例化ExtendLoader的时候设置的值
+     */
     private final Class<?> type;
 
     private final ExtensionInjector injector;
@@ -130,6 +134,9 @@ public class ExtensionLoader<T> {
     private final    ConcurrentMap<String, Holder<Object>> cachedInstances        = new ConcurrentHashMap<>();
     private final    Holder<Object>                        cachedAdaptiveInstance = new Holder<>();
     private volatile Class<?>                              cachedAdaptiveClass    = null;
+    /**
+     * 标注在接口上的@SPI注解里面的value值
+     */
     private          String                                cachedDefaultName;
     private volatile Throwable                             createAdaptiveInstanceError;
 
@@ -564,6 +571,7 @@ public class ExtensionLoader<T> {
         if (StringUtils.isEmpty(name)) {
             throw new IllegalArgumentException("Extension name == null");
         }
+        // name为true的时候返回默认扩展类
         if ("true".equals(name)) {
             return getDefaultExtension();
         }
@@ -577,6 +585,7 @@ public class ExtensionLoader<T> {
             synchronized (holder) {
                 instance = holder.get();
                 if (instance == null) {
+                    // 创建扩展点实例
                     instance = createExtension(name, wrap);
                     holder.set(instance);
                 }
@@ -787,6 +796,8 @@ public class ExtensionLoader<T> {
 
     @SuppressWarnings("unchecked")
     private T createExtension(String name, boolean wrap) {
+        // 根据name（例如，“dubbo”）获取Class对象
+        // 需要使用应用加载器将META-INF/services、META-INF/dubbo、META-INF/dubbo/internal 三个路径下的文件加载，然后获取缩写name对应的全限定名称
         Class<?> clazz = getExtensionClasses().get(name);
         if (clazz == null || unacceptableExceptions.contains(name)) {
             throw findException(name);
@@ -794,6 +805,7 @@ public class ExtensionLoader<T> {
         try {
             T instance = (T) extensionInstances.get(clazz);
             if (instance == null) {
+                // 使用Class对象创建该类的实例，并缓存起来
                 extensionInstances.putIfAbsent(clazz, createExtensionInstance(clazz));
                 instance = (T) extensionInstances.get(clazz);
                 instance = postProcessBeforeInitialization(instance, name);
@@ -959,6 +971,12 @@ public class ExtensionLoader<T> {
         return getExtensionClasses().get(name);
     }
 
+    /**
+     * 根据name（例如，“dubbo”）获取Class对象
+     * 需要使用应用加载器将META-INF/services、META-INF/dubbo、META-INF/dubbo/internal
+     * 三个路径下的文件加载，获取缩写name对应的全限定名称，然后加载并初始化全限定名称的类
+     * @return 所有扩展类的Class对象
+     */
     private Map<String, Class<?>> getExtensionClasses() {
         Map<String, Class<?>> classes = cachedClasses.get();
         if (classes == null) {
@@ -984,15 +1002,20 @@ public class ExtensionLoader<T> {
 
     /**
      * synchronized in getExtensionClasses
+     * 使用应用加载器将META-INF/services、META-INF/dubbo、META-INF/dubbo/internal
+     * 三个路径下的文件加载，获取缩写name对应的全限定名称，然后加载并初始化全限定名称的类。
+     * 加载了三个不同的路径，使用的策略模式进行加载的。
      */
     @SuppressWarnings("deprecation")
     private Map<String, Class<?>> loadExtensionClasses() throws InterruptedException {
         checkDestroyed();
+        // 设置实例化变量cachedDefaultName
         cacheDefaultExtensionName();
 
         Map<String, Class<?>> extensionClasses = new HashMap<>();
 
         for (LoadingStrategy strategy : strategies) {
+            // 一个策略加载一个路径
             loadDirectory(extensionClasses, strategy, type.getName());
 
             // compatible with old ExtensionFactory
@@ -1022,6 +1045,7 @@ public class ExtensionLoader<T> {
 
     /**
      * extract and cache default extension name if exists
+     * 为cachedDefaultName 赋值
      */
     private void cacheDefaultExtensionName() {
         final SPI defaultAnnotation = type.getAnnotation(SPI.class);
@@ -1090,6 +1114,7 @@ public class ExtensionLoader<T> {
             }
 
             // 根据fileName（META-INF/dubbo/internal/org.apache.dubbo.common.extension.ExtensionInjector） 获取所有的实现类的全限定名称或者路径
+            // 获得URLs
             Map<ClassLoader, Set<java.net.URL>> resources = ClassLoaderResourceLoader.loadResources(
                 fileName, classLoadersToLoad);
             resources.forEach(((classLoader, urls) -> {

@@ -22,13 +22,20 @@ import org.apache.dubbo.rpc.model.ModuleModel;
 
 /**
  * Extension SPI Scope
+ * 模型的作用域取值<br/>
+ * 一个JVM只有一个 Dubbo framework 模型<br/>
+ * 一个 Dubbo FRAMEWORK 模型 有多个 Application 模型，多应用共享<br/>
+ * 一个 Dubbo APPLICATION 模型 有多个 Module 模型<br/>
+ * SELF 则表示自给自足，为每个作用域创建一个实例，用于特殊的SPI扩展，如{@link ExtensionInjector}<br/>
  * @see SPI
  * @see ExtensionDirector
+ * <a href = 'https://blog.csdn.net/wufagang/article/details/130786109'> Dubbo  ScopeModel 详解<a/>
  */
 public enum ExtensionScope {
 
     /**
-     * The extension instance is used within framework, shared with all applications and modules.
+     * The extension instance is used within framework, shared with all applications and modules.<br/>
+     * <b>Dubbo框架模型，最高层级的模型，在同一个JVM的多个Dubbo应用中共享。<b/>
      *
      * <p>Framework scope SPI extension can only obtain {@link FrameworkModel},
      * cannot get the {@link ApplicationModel} and {@link ModuleModel}.</p>

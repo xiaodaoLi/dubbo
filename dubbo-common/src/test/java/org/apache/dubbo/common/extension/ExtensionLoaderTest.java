@@ -100,7 +100,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 class ExtensionLoaderTest {
 
     private <T> ExtensionLoader<T> getExtensionLoader(Class<T> type) {
-        return ApplicationModel.defaultModel().getExtensionDirector().getExtensionLoader(type);
+        ApplicationModel applicationModel = ApplicationModel.defaultModel();
+        ExtensionDirector extensionDirector = applicationModel.getExtensionDirector();
+        ExtensionLoader<T> extensionLoader;
+        extensionLoader = extensionDirector.getExtensionLoader(type);
+        return extensionLoader;
     }
 
     @Test
@@ -158,8 +162,11 @@ class ExtensionLoaderTest {
 
     @Test
     void test_getExtension() {
-        assertTrue(getExtensionLoader(SimpleExt.class).getExtension("impl1") instanceof SimpleExtImpl1);
-        assertTrue(getExtensionLoader(SimpleExt.class).getExtension("impl2") instanceof SimpleExtImpl2);
+        ExtensionLoader<SimpleExt> extensionLoader = getExtensionLoader(SimpleExt.class);
+        // SimpleExt接口上面标注了@SPI("impl1")，所以默认实现就是SimpleExtImpl1
+        assertTrue(extensionLoader.getDefaultExtension() instanceof SimpleExtImpl1);
+        assertTrue(extensionLoader.getExtension("impl1") instanceof SimpleExtImpl1);
+        assertTrue(extensionLoader.getExtension("impl2") instanceof SimpleExtImpl2);
     }
 
     @Test
