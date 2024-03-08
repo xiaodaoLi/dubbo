@@ -206,6 +206,7 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
                 providerURLs = addressListener.notify(providerURLs, getConsumerUrl(), this);
             }
         }
+        // 刷新invokers和override信息
         refreshOverrideAndInvoker(providerURLs);
     }
 
@@ -289,10 +290,12 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
                 oldUrlInvokerMap = new LinkedHashMap<>(Math.round(1 + localUrlInvokerMap.size() / DEFAULT_HASHMAP_LOAD_FACTOR));
                 localUrlInvokerMap.forEach(oldUrlInvokerMap::put);
             }
+            // 将url转为Invoker，得到URL与Invoker的映射关系
             Map<URL, Invoker<T>> newUrlInvokerMap = toInvokers(oldUrlInvokerMap, invokerUrls);// Translate url list to Invoker map
 
             /*
              * If the calculation is wrong, it is not processed.
+             * 将URL转为Invoker如果失败，打印日志后直接返回
              *
              * 1. The protocol configured by the client is inconsistent with the protocol of the server.
              *    eg: consumer protocol = dubbo, provider only has other protocol services(rest).
@@ -314,12 +317,14 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
             }
 
             List<Invoker<T>> newInvokers = Collections.unmodifiableList(new ArrayList<>(newUrlInvokerMap.values()));
+            // 如果是多个组的Invoker，则进行多组合并操作
             BitList<Invoker<T>> finalInvokers = multiGroup ? new BitList<>(toMergeInvokerList(newInvokers)) : new BitList<>(newInvokers);
             // pre-route and build cache
             refreshRouter(finalInvokers.clone(), () -> this.setInvokers(finalInvokers));
             this.urlInvokerMap = newUrlInvokerMap;
 
             try {
+                // 生成最新的Invoker后，还需要销毁无用的Invoker，避免调用已经下线的服务
                 destroyUnusedInvokers(oldUrlInvokerMap, newUrlInvokerMap); // Close the unused Invoker
             } catch (Exception e) {
                 logger.warn(REGISTRY_FAILED_DESTROY_SERVICE, "", "", "destroyUnusedInvokers error. ", e);
@@ -406,8 +411,10 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
         if (urls == null || urls.isEmpty()) {
             return newUrlInvokerMap;
         }
+        // 获取消费端配置的协议
         String queryProtocols = this.queryMap.get(PROTOCOL_KEY);
         for (URL providerUrl : urls) {
+            // 如果该服务端不支持这个协议，跳过这个服务端找其他的服务端
             if (!checkProtocolValid(queryProtocols, providerUrl)) {
                 continue;
             }
@@ -417,8 +424,10 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
             // Cache key is url that does not merge with consumer side parameters,
             // regardless of how the consumer combines parameters,
             // if the server url changes, then refer again
+            // 根据URL获取Invoker
             Invoker<T> invoker = oldUrlInvokerMap == null ? null : oldUrlInvokerMap.remove(url);
             if (invoker == null) { // Not in the cache, refer again
+                // 缓存未命中
                 try {
                     boolean enabled = true;
                     if (url.hasParameter(DISABLED_KEY)) {
@@ -427,6 +436,7 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
                         enabled = url.getParameter(ENABLED_KEY, true);
                     }
                     if (enabled) {
+                        // 缓存未命中，调用refer获取Invoker
                         invoker = protocol.refer(serviceType, url);
                     }
                 } catch (Throwable t) {
@@ -443,6 +453,7 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
                             "Failed to refer invoker for interface:" + serviceType + ",url:(" + url + ")" + t.getMessage(), t);
                     }
                 }
+                // 缓存Invoker实例
                 if (invoker != null) { // Put new invoker in cache
                     newUrlInvokerMap.put(url, invoker);
                 }
@@ -453,6 +464,12 @@ public class RegistryDirectory<T> extends DynamicDirectory<T> {
         return newUrlInvokerMap;
     }
 
+    /**
+     * 检查消费端配置的协议是否是服务端接受的
+     * @param queryProtocols
+     * @param providerUrl
+     * @return
+     */
     private boolean checkProtocolValid(String queryProtocols, URL providerUrl) {
         // If protocol is configured at the reference side, only the matching protocol is selected
         if (queryProtocols != null && queryProtocols.length() > 0) {

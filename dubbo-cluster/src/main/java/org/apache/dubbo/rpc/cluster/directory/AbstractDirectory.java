@@ -75,6 +75,7 @@ import static org.apache.dubbo.rpc.cluster.Constants.REFER_KEY;
 
 /**
  * Abstract implementation of Directory: Invoker list returned from this Directory's list method have been filtered by Routers
+ * 返回的Invoker列表已经是经过路由过滤之后的列表了
  */
 public abstract class AbstractDirectory<T> implements Directory<T> {
 
@@ -220,6 +221,7 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
                 }
             }
 
+            // doList由具体的子类实现，传入了RouterChain信息，子类根据需要进行路由
             List<Invoker<T>> routedResult = doList(singleChain, availableInvokers, invocation);
             if (routedResult.isEmpty()) {
                 // 2-2 - No provider available.

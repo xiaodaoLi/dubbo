@@ -28,6 +28,14 @@ import java.util.List;
 /**
  * Directory. (SPI, Prototype, ThreadSafe)
  * <p>
+ *     在一个服务集群中，服务提供者数量并不是一成不变的，如果集群中新增了一台机器，相应地在服务目录中就要新增一条服务提供者记录。
+ *     或者，如果服务提供者的配置修改了，服务目录中的记录也要做相应的更新。如果这样说，服务目录和注册中心的功能不就雷同了吗？
+ *     确实如此，这里这么说是为了方便大家理解。<br/>
+ *     <b>实际上服务目录在获取注册中心的服务配置信息后，会为每条配置信息生成一个 Invoker 对象，并把这个 Invoker 对象存储起来，
+ *     这个 Invoker 才是服务目录最终持有的对象。<b/><br/><br/>
+ *     <b>Invoker 有什么用呢？看名字就知道了，这是一个具有远程调用功能的对象。讲到这大家应该知道了什么是服务目录了，它可以看做是 Invoker 集合，
+ *     且这个集合中的元素会随注册中心的变化而进行动态调整。<b/>
+ * </p>
  * <a href="http://en.wikipedia.org/wiki/Directory_service">Directory Service</a>
  * <a href="https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/directory/">Dubbo 官网对于服务目录的解释</a>
  *
